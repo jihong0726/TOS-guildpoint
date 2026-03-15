@@ -1,0 +1,218 @@
+export default function TosGuildScoreCalculator() {
+  const { useMemo, useState } = React;
+
+  const [target, setTarget] = useState(5000);
+  const [current, setCurrent] = useState(0);
+  const [normalScore, setNormalScore] = useState(40);
+  const [specialScore, setSpecialScore] = useState(200);
+
+  const result = useMemo(() => {
+    const safeTarget = Math.max(0, Number(target) || 0);
+    const safeCurrent = Math.max(0, Number(current) || 0);
+    const n = Math.max(1, Number(normalScore) || 40);
+    const s = Math.max(1, Number(specialScore) || 200);
+
+    const remaining = Math.max(0, safeTarget - safeCurrent);
+    const normalOnly = Math.ceil(remaining / n);
+    const specialOnly = Math.ceil(remaining / s);
+
+    const mixes = [];
+    for (let special = 0; special <= Math.ceil(remaining / s) + 2; special++) {
+      const earnedBySpecial = special * s;
+      const rest = Math.max(0, remaining - earnedBySpecial);
+      const normal = Math.ceil(rest / n);
+      const total = earnedBySpecial + normal * n;
+      const extra = Math.max(0, safeCurrent + total - safeTarget);
+      mixes.push({ special, normal, totalRuns: special + normal, totalScore: total, extra });
+    }
+
+    const bestByLeastRuns = [...mixes].sort((a, b) => {
+      if (a.totalRuns !== b.totalRuns) return a.totalRuns - b.totalRuns;
+      if (a.extra !== b.extra) return a.extra - b.extra;
+      return b.special - a.special;
+    })[0];
+
+    const bestByLeastWaste = [...mixes].sort((a, b) => {
+      if (a.extra !== b.extra) return a.extra - b.extra;
+      if (a.totalRuns !== b.totalRuns) return a.totalRuns - b.totalRuns;
+      return b.special - a.special;
+    }).slice(0, 8);
+
+    const progress = safeTarget === 0 ? 100 : Math.min(100, (safeCurrent / safeTarget) * 100);
+
+    return {
+      safeTarget,
+      safeCurrent,
+      remaining,
+      normalOnly,
+      specialOnly,
+      bestByLeastRuns,
+      bestByLeastWaste,
+      progress,
+      reached: safeCurrent >= safeTarget,
+    };
+  }, [target, current, normalScore, specialScore]);
+
+  const card = "rounded-3xl border border-yellow-500/25 bg-slate-900/75 shadow-2xl shadow-black/30 backdrop-blur";
+  const label = "mb-2 block text-sm font-semibold tracking-wide text-yellow-200/90";
+  const input = "w-full rounded-2xl border border-yellow-400/25 bg-slate-950/80 px-4 py-3 text-base text-white outline-none transition focus:border-yellow-300 focus:ring-2 focus:ring-yellow-300/25";
+
+  return (
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.18),_transparent_35%),linear-gradient(180deg,_#130f1f_0%,_#0b1020_55%,_#05070f_100%)] text-white">
+      <div className="mx-auto max-w-6xl px-4 py-8 md:px-6 lg:px-8">
+        <div className="mb-8 overflow-hidden rounded-[28px] border border-yellow-400/25 bg-black/35 shadow-2xl shadow-black/40">
+          <div className="relative p-6 md:p-8">
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(251,191,36,0.10),transparent_45%,rgba(168,85,247,0.10))]" />
+            <div className="relative">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-yellow-300/30 bg-yellow-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.22em] text-yellow-200">
+                神魔之塔风格
+              </div>
+              <h1 className="text-3xl font-black tracking-wide text-yellow-100 md:text-5xl">
+                公会任务分数计算器
+              </h1>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-200 md:text-base">
+                可自订目标分数、目前分数、普通任务分数与特别任务分数，快速算出还差多少，以及怎样搭配最省次数。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <section className={`${card} p-5 md:p-6`}>
+            <h2 className="mb-5 text-xl font-bold text-yellow-100">基础设定</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className={label}>目标分数</label>
+                <input className={input} type="number" min="0" value={target} onChange={(e) => setTarget(e.target.value)} />
+              </div>
+              <div>
+                <label className={label}>目前已有分数</label>
+                <input className={input} type="number" min="0" value={current} onChange={(e) => setCurrent(e.target.value)} />
+              </div>
+              <div>
+                <label className={label}>普通任务分数</label>
+                <input className={input} type="number" min="1" value={normalScore} onChange={(e) => setNormalScore(e.target.value)} />
+              </div>
+              <div>
+                <label className={label}>特别任务分数</label>
+                <input className={input} type="number" min="1" value={specialScore} onChange={(e) => setSpecialScore(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <button
+                onClick={() => {
+                  setTarget(5000);
+                  setCurrent(0);
+                  setNormalScore(40);
+                  setSpecialScore(200);
+                }}
+                className="rounded-2xl border border-yellow-300/30 bg-yellow-400/10 px-4 py-3 font-bold text-yellow-100 transition hover:bg-yellow-400/20"
+              >
+                预设常用值
+              </button>
+              <button
+                onClick={() => setCurrent(target)}
+                className="rounded-2xl border border-cyan-300/30 bg-cyan-400/10 px-4 py-3 font-bold text-cyan-100 transition hover:bg-cyan-400/20"
+              >
+                直接设为达标
+              </button>
+              <button
+                onClick={() => {
+                  setTarget(0);
+                  setCurrent(0);
+                }}
+                className="rounded-2xl border border-fuchsia-300/30 bg-fuchsia-400/10 px-4 py-3 font-bold text-fuchsia-100 transition hover:bg-fuchsia-400/20"
+              >
+                清空分数
+              </button>
+            </div>
+
+            <div className="mt-7 rounded-3xl border border-yellow-400/20 bg-black/30 p-4">
+              <div className="mb-2 flex items-center justify-between text-sm text-slate-200">
+                <span>目前进度</span>
+                <span>{result.progress.toFixed(1)}%</span>
+              </div>
+              <div className="h-4 overflow-hidden rounded-full bg-slate-800">
+                <div
+                  className="h-full rounded-full bg-[linear-gradient(90deg,#facc15,#f59e0b,#a855f7)] transition-all duration-300"
+                  style={{ width: `${result.progress}%` }}
+                />
+              </div>
+              <div className="mt-3 text-sm text-slate-300">
+                {result.reached
+                  ? `已达标，目前 ${result.safeCurrent.toLocaleString()} 分。`
+                  : `距离目标还差 ${result.remaining.toLocaleString()} 分。`}
+              </div>
+            </div>
+          </section>
+
+          <section className="grid gap-6">
+            <div className={`${card} p-5 md:p-6`}>
+              <h2 className="mb-4 text-xl font-bold text-yellow-100">快速结果</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-3xl border border-yellow-300/20 bg-yellow-400/10 p-4">
+                  <div className="text-sm text-yellow-100/80">只打普通任务</div>
+                  <div className="mt-2 text-3xl font-black text-yellow-50">{result.normalOnly}</div>
+                  <div className="mt-1 text-sm text-yellow-100/80">次</div>
+                </div>
+                <div className="rounded-3xl border border-purple-300/20 bg-purple-400/10 p-4">
+                  <div className="text-sm text-purple-100/80">只打特别任务</div>
+                  <div className="mt-2 text-3xl font-black text-purple-50">{result.specialOnly}</div>
+                  <div className="mt-1 text-sm text-purple-100/80">次</div>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-3xl border border-cyan-300/20 bg-cyan-400/10 p-4">
+                <div className="text-sm text-cyan-100/80">最省次数组合</div>
+                <div className="mt-3 grid gap-2 text-sm text-cyan-50">
+                  <div>特别任务：<span className="font-bold">{result.bestByLeastRuns?.special ?? 0}</span> 次</div>
+                  <div>普通任务：<span className="font-bold">{result.bestByLeastRuns?.normal ?? 0}</span> 次</div>
+                  <div>总次数：<span className="font-bold">{result.bestByLeastRuns?.totalRuns ?? 0}</span> 次</div>
+                  <div>超出目标：<span className="font-bold">{result.bestByLeastRuns?.extra ?? 0}</span> 分</div>
+                </div>
+              </div>
+            </div>
+
+            <div className={`${card} p-5 md:p-6`}>
+              <h2 className="mb-4 text-xl font-bold text-yellow-100">推荐组合</h2>
+              <div className="overflow-hidden rounded-3xl border border-yellow-300/15">
+                <div className="grid grid-cols-4 bg-yellow-400/10 px-4 py-3 text-sm font-bold text-yellow-100">
+                  <div>特别</div>
+                  <div>普通</div>
+                  <div>总次数</div>
+                  <div>超出分数</div>
+                </div>
+                <div className="divide-y divide-white/8 bg-black/20">
+                  {result.bestByLeastWaste.map((row, idx) => (
+                    <div key={`${row.special}-${row.normal}-${idx}`} className="grid grid-cols-4 px-4 py-3 text-sm text-slate-200">
+                      <div>{row.special}</div>
+                      <div>{row.normal}</div>
+                      <div className="font-semibold text-white">{row.totalRuns}</div>
+                      <div>{row.extra}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section className={`${card} mt-6 p-5 md:p-6`}>
+          <h2 className="mb-4 text-xl font-bold text-yellow-100">使用说明</h2>
+          <div className="grid gap-3 text-sm leading-7 text-slate-200 md:grid-cols-3">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+              1. 输入你的目标分数，以及目前已经累积的分数。
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+              2. 普通任务预设 40 分，特别任务预设 200 分，也可以自行修改。
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+              3. 系统会自动算出只打普通、只打特别，以及最推荐的混合打法。
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
