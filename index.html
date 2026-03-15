@@ -59,25 +59,104 @@
     .btn-gold {
       background: linear-gradient(180deg, rgba(212,175,55,0.22) 0%, rgba(146, 103, 24, 0.18) 100%);
       color: #fef3c7;
-      border-color: rgba(
+      border-color: rgba(245, 208, 94, 0.30);
+    }
+
+    .btn-violet {
+      background: linear-gradient(180deg, rgba(109, 40, 217, 0.28) 0%, rgba(67, 56, 202, 0.18) 100%);
+      color: #ede9fe;
+      border-color: rgba(167, 139, 250, 0.30);
+    }
+
+    .btn-blue {
+      background: linear-gradient(180deg, rgba(37, 99, 235, 0.22) 0%, rgba(30, 64, 175, 0.16) 100%);
+      color: #dbeafe;
+      border-color: rgba(96, 165, 250, 0.25);
+    }
+
+    .btn-red {
+      background: linear-gradient(180deg, rgba(185, 28, 28, 0.24) 0%, rgba(127, 29, 29, 0.16) 100%);
+      color: #fee2e2;
+      border-color: rgba(252, 165, 165, 0.25);
+      padding: 8px 12px;
+      font-size: 14px;
+      min-height: auto;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      background: rgba(212, 175, 55, 0.14);
+      border: 1px solid rgba(245, 208, 94, 0.24);
+      color: #f5d05e;
+    }
+
+    .progress-wrap {
+      height: 16px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      overflow: hidden;
+      border: 1px solid rgba(212, 175, 55, 0.12);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #d4af37, #f5d05e, #8b5cf6);
+      transition: width 0.3s ease;
+      box-shadow: 0 0 18px rgba(212,175,55,0.25);
+    }
+
+    .record-card {
+      border: 1px solid rgba(212,175,55,0.12);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.02) 100%);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .ornament {
+      position: relative;
+    }
+
+    .ornament::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 26px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(245,208,94,0.24), rgba(139,92,246,0.12), rgba(245,208,94,0.2));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
   <div class="max-w-5xl mx-auto px-4 py-8 md:px-6 lg:px-8">
-    <div class="mb-8 rounded-[28px] border border-yellow-400/20 bg-black/30 shadow-2xl overflow-hidden">
+    <div class="mb-8 rounded-[28px] border border-yellow-500/20 bg-black/30 shadow-2xl overflow-hidden ornament">
       <div class="relative p-6 md:p-8">
         <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(251,191,36,0.10),transparent_45%,rgba(168,85,247,0.10))]"></div>
         <div class="relative">
-          <div class="tag mb-3">神魔之塔风格</div>
+          <div class="tag mb-3">Tower of Saviors Style</div>
           <h1 class="text-3xl md:text-5xl font-black text-yellow-100 tracking-wide">公会任务分数计算器</h1>
           <p class="mt-3 text-slate-200 text-sm md:text-base leading-7 max-w-3xl">
-            先输入目前已有分数与目标分数，按开始后，记录时只保留普通与特别两个按钮。
+            先输入目前已有分数与目标分数，按开始后，用普通与特别两个按钮快速记录，并自动计算还需要多少体力。
           </p>
         </div>
       </div>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-[1fr_1fr]">
-      <section class="glass rounded-3xl p-5 md:p-6">
+      <section class="glass rounded-3xl p-5 md:p-6 ornament">
         <h2 class="text-xl font-bold text-yellow-100 mb-5">开始设定</h2>
         <div class="grid gap-4">
           <div>
@@ -100,20 +179,19 @@
           </div>
         </div>
 
-        <div class="mt-6 grid gap-3 sm:grid-cols-3">
-          <button id="startBtn" class="btn btn-yellow">开始</button>
-          <button id="presetBtn" class="btn btn-cyan">预设常用值</button>
-          <button id="resetAllBtn" class="btn btn-pink">重置全部</button>
+        <div class="mt-6 grid gap-3 sm:grid-cols-2">
+          <button id="startBtn" class="btn btn-gold">开始</button>
+          <button id="resetAllBtn" class="btn btn-blue">重置全部</button>
         </div>
 
-        <div class="mt-6 rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300 leading-7">
+        <div class="mt-6 rounded-3xl border border-yellow-400/10 bg-white/5 p-4 text-sm text-slate-300 leading-7">
           - 按开始后，会把目前已有分数当成起始分数保存下来<br>
           - 后续只要按普通或特别，就会自动加分并记录时间<br>
-          - 不显示推荐组合，只保留进度与记录历史
+          - 每场体力固定 40，会自动计算还需要多少体力
         </div>
       </section>
 
-      <section class="glass rounded-3xl p-5 md:p-6">
+      <section class="glass rounded-3xl p-5 md:p-6 ornament">
         <h2 class="text-xl font-bold text-yellow-100 mb-5">目前进度</h2>
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="rounded-3xl border border-yellow-300/20 bg-yellow-400/10 p-4">
@@ -123,6 +201,10 @@
           <div class="rounded-3xl border border-cyan-300/20 bg-cyan-400/10 p-4">
             <div class="text-sm text-cyan-100/80">距离目标</div>
             <div id="remainingDisplay" class="mt-2 text-3xl font-black text-cyan-50">0</div>
+          </div>
+          <div class="rounded-3xl border border-violet-300/20 bg-violet-400/10 p-4 sm:col-span-2">
+            <div class="text-sm text-violet-100/80">尚需体力</div>
+            <div id="staminaDisplay" class="mt-2 text-3xl font-black text-violet-50">0</div>
           </div>
         </div>
 
@@ -140,18 +222,14 @@
         <div class="mt-6">
           <h3 class="text-lg font-bold text-yellow-100 mb-3">快速记录</h3>
           <div class="grid gap-3 sm:grid-cols-2">
-            <button id="addNormalBtn" class="btn btn-yellow">普通 +40</button>
-            <button id="addSpecialBtn" class="btn btn-purple">特别 +200</button>
-          </div>
-          <div class="mt-4">
-            <label class="block text-sm font-semibold text-yellow-200/90 mb-2">备注</label>
-            <input id="logNote" class="input" type="text" placeholder="例如：刚打完、补记、队友代打" />
+            <button id="addNormalBtn" class="btn btn-gold">普通 +40</button>
+            <button id="addSpecialBtn" class="btn btn-violet">特别 +200</button>
           </div>
         </div>
       </section>
     </div>
 
-    <section class="glass rounded-3xl p-5 md:p-6 mt-6">
+    <section class="glass rounded-3xl p-5 md:p-6 mt-6 ornament">
       <div class="mb-4 flex items-center justify-between gap-3">
         <h2 class="text-xl font-bold text-yellow-100">分数记录历史</h2>
         <div id="historyCount" class="text-sm text-slate-300">共 0 笔记录</div>
@@ -161,7 +239,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'tos-guild-score-tracker-v2';
+    const STORAGE_KEY = 'tos-guild-score-tracker-v3';
 
     const el = {
       target: document.getElementById('target'),
@@ -173,11 +251,9 @@
       progressText: document.getElementById('progressText'),
       progressBar: document.getElementById('progressBar'),
       statusText: document.getElementById('statusText'),
-      logNote: document.getElementById('logNote'),
       addNormalBtn: document.getElementById('addNormalBtn'),
       addSpecialBtn: document.getElementById('addSpecialBtn'),
       startBtn: document.getElementById('startBtn'),
-      presetBtn: document.getElementById('presetBtn'),
       resetAllBtn: document.getElementById('resetAllBtn'),
       historyCount: document.getElementById('historyCount'),
       historyWrap: document.getElementById('historyWrap')
@@ -219,16 +295,7 @@
       return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
 
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
-
-    function getExtraScore() {
+        function getExtraScore() {
       return state.history.reduce((sum, item) => sum + Number(item.score || 0), 0);
     }
 
@@ -268,10 +335,9 @@
         type,
         typeLabel: label,
         score,
-        note: el.logNote.value.trim()
+        note: ''
       });
 
-      el.logNote.value = '';
       saveState();
       render();
     }
@@ -316,7 +382,7 @@
             <div>
               <div class="text-sm text-slate-400">#${state.history.length - index} ・ ${item.time}</div>
               <div class="mt-1 text-lg font-bold text-yellow-100">+${item.score} 分 ・ ${item.typeLabel}</div>
-              <div class="mt-1 text-sm text-slate-300">${item.note ? escapeHtml(item.note) : '没有备注'}</div>
+              <div class="mt-1 text-sm text-slate-300">已记录</div>
             </div>
             <button class="btn btn-red" onclick="deleteLog('${item.id}')">删除</button>
           </div>
@@ -329,9 +395,14 @@
       const target = Math.max(0, Number(state.target) || 0);
       const remaining = Math.max(0, target - current);
       const progress = target === 0 ? 100 : Math.min(100, (current / target) * 100);
+      const normal = Math.max(1, Number(state.normalScore) || 40);
+      const special = Math.max(1, Number(state.specialScore) || 200);
+      const bestRuns = remaining === 0 ? 0 : Math.ceil(remaining / Math.max(normal, special));
+      const stamina = bestRuns * 40;
 
       el.currentDisplay.textContent = current.toLocaleString();
       el.remainingDisplay.textContent = remaining.toLocaleString();
+      document.getElementById('staminaDisplay').textContent = stamina.toLocaleString();
       el.progressText.textContent = `${progress.toFixed(1)}%`;
       el.progressBar.style.width = `${progress}%`;
 
@@ -340,7 +411,7 @@
       } else if (current >= target) {
         el.statusText.textContent = `已达标，目前 ${current.toLocaleString()} 分。`;
       } else {
-        el.statusText.textContent = `距离目标还差 ${remaining.toLocaleString()} 分。`;
+        el.statusText.textContent = `距离目标还差 ${remaining.toLocaleString()} 分，若优先打高分关卡，约还需要 ${stamina.toLocaleString()} 体力。`;
       }
 
       renderHistory();
@@ -353,12 +424,7 @@
     el.addSpecialBtn.addEventListener('click', () => addScore('special'));
     el.resetAllBtn.addEventListener('click', resetAll);
 
-    el.presetBtn.addEventListener('click', () => {
-      el.target.value = 5000;
-      el.normalScore.value = 40;
-      el.specialScore.value = 200;
-    });
-
+    
     el.target.addEventListener('input', () => {
       state.target = Math.max(0, Number(el.target.value) || 0);
       saveState();
@@ -369,12 +435,14 @@
       state.normalScore = Math.max(1, Number(el.normalScore.value) || 40);
       saveState();
       syncButtons();
+      render();
     });
 
     el.specialScore.addEventListener('input', () => {
       state.specialScore = Math.max(1, Number(el.specialScore.value) || 200);
       saveState();
       syncButtons();
+      render();
     });
 
     fillInputs();
