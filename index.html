@@ -3,111 +3,249 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>神魔之塔风格 公会任务分数计算器</title>
+  <title>神魔之塔公会分数</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    :root {
+      --gold: #d4af37;
+      --gold-2: #f5d05e;
+      --violet: #8b5cf6;
+      --bg-1: #07080d;
+      --bg-2: #0c1220;
+      --panel: rgba(12, 16, 28, 0.92);
+      --line: rgba(212, 175, 55, 0.18);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
+      min-height: 100vh;
+      color: var(--text);
       font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
       background:
-        radial-gradient(circle at top, rgba(120, 53, 15, 0.18), transparent 24%),
-        radial-gradient(circle at 20% 10%, rgba(109, 40, 217, 0.14), transparent 24%),
-        linear-gradient(180deg, #07080d 0%, #0c1220 50%, #0a0f1b 100%);
-      color: #f8fafc;
-      min-height: 100vh;
+        radial-gradient(circle at top, rgba(212,175,55,0.10), transparent 24%),
+        radial-gradient(circle at 20% 10%, rgba(139,92,246,0.12), transparent 24%),
+        radial-gradient(circle at 80% 18%, rgba(59,130,246,0.08), transparent 20%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 45%, #0a0f1b 100%);
     }
 
-    .panel {
-      border: 1px solid rgba(212, 175, 55, 0.20);
-      background: linear-gradient(180deg, rgba(10, 12, 22, 0.94) 0%, rgba(16, 22, 36, 0.90) 100%);
-      box-shadow: 0 16px 36px rgba(0,0,0,0.42);
+    .wrap {
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 18px 14px 26px;
     }
 
-    .title-panel {
-      border: 1px solid rgba(212, 175, 55, 0.24);
-      background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(109,40,217,0.08));
-      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+    .hero {
+      position: relative;
+      border-radius: 24px;
+      padding: 18px;
+      border: 1px solid rgba(212,175,55,0.22);
+      background:
+        linear-gradient(180deg, rgba(17,23,39,0.96), rgba(10,14,24,0.94)),
+        linear-gradient(135deg, rgba(212,175,55,0.06), rgba(139,92,246,0.06));
+      box-shadow: 0 20px 44px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.03);
+      overflow: hidden;
     }
 
-    .input {
-      width: 100%;
-      border-radius: 14px;
-      border: 1px solid rgba(212, 175, 55, 0.18);
-      background: rgba(7, 10, 18, 0.96);
-      color: #fff;
-      padding: 12px 14px;
-      outline: none;
-    }
-
-    .input:focus {
-      border-color: rgba(245, 208, 94, 0.65);
-      box-shadow: 0 0 0 3px rgba(245, 208, 94, 0.10);
-    }
-
-    .btn {
-      border-radius: 14px;
-      padding: 14px 16px;
-      font-weight: 800;
-      border: 1px solid rgba(212,175,55,0.18);
-      cursor: pointer;
-      transition: 0.18s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-    }
-
-    .btn-gold {
-      background: linear-gradient(180deg, rgba(212,175,55,0.20), rgba(120, 53, 15, 0.16));
-      color: #fef3c7;
-    }
-
-    .btn-violet {
-      background: linear-gradient(180deg, rgba(109,40,217,0.24), rgba(67,56,202,0.16));
-      color: #ede9fe;
-      border-color: rgba(167,139,250,0.20);
-    }
-
-    .btn-blue {
-      background: linear-gradient(180deg, rgba(37,99,235,0.18), rgba(30,64,175,0.14));
-      color: #dbeafe;
-      border-color: rgba(96,165,250,0.18);
-    }
-
-    .btn-red {
-      background: linear-gradient(180deg, rgba(185,28,28,0.22), rgba(127,29,29,0.14));
-      color: #fee2e2;
-      border-color: rgba(252,165,165,0.18);
-      padding: 8px 12px;
-      font-size: 14px;
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(245,208,94,0.10), transparent 40%, rgba(139,92,246,0.10));
     }
 
     .tag {
       display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
       border-radius: 999px;
-      padding: 6px 10px;
+      border: 1px solid rgba(245,208,94,0.16);
+      background: rgba(212,175,55,0.10);
+      color: var(--gold-2);
       font-size: 12px;
       font-weight: 800;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      background: rgba(212,175,55,0.12);
-      border: 1px solid rgba(245,208,94,0.18);
-      color: #f5d05e;
+      letter-spacing: 0.08em;
     }
 
-    .metric {
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.03);
-      border-radius: 18px;
+    .title {
+      margin: 10px 0 0;
+      font-size: 28px;
+      font-weight: 900;
+      color: #fef3c7;
+      letter-spacing: 0.03em;
+    }
+
+    .sub {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .settings-toggle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      min-width: 64px;
+      height: 38px;
+      border: 1px solid rgba(96,165,250,0.18);
+      background: linear-gradient(180deg, rgba(37,99,235,0.18), rgba(30,64,175,0.12));
+      color: #dbeafe;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .card {
+      margin-top: 14px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(10,12,22,0.95), rgba(13,18,31,0.92));
+      box-shadow: 0 14px 34px rgba(0,0,0,0.34);
       padding: 16px;
     }
 
+    .settings {
+      display: none;
+    }
+
+    .settings.show {
+      display: block;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #fef3c7;
+    }
+
+    .label {
+      display: block;
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .input {
+      width: 100%;
+      border: 1px solid rgba(212,175,55,0.16);
+      background: rgba(7,10,18,0.96);
+      color: #fff;
+      border-radius: 14px;
+      padding: 12px 14px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .input:focus {
+      border-color: rgba(245,208,94,0.55);
+      box-shadow: 0 0 0 3px rgba(245,208,94,0.08);
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      border: 1px solid rgba(212,175,55,0.16);
+      border-radius: 14px;
+      min-height: 50px;
+      padding: 12px 14px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform .18s ease, filter .18s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+
+    .btn-gold {
+      background: linear-gradient(180deg, rgba(212,175,55,0.22), rgba(120,53,15,0.14));
+      color: #fef3c7;
+    }
+
+    .btn-violet {
+      background: linear-gradient(180deg, rgba(109,40,217,0.26), rgba(67,56,202,0.14));
+      color: #ede9fe;
+      border-color: rgba(167,139,250,0.18);
+    }
+
+    .btn-blue {
+      background: linear-gradient(180deg, rgba(37,99,235,0.18), rgba(30,64,175,0.12));
+      color: #dbeafe;
+      border-color: rgba(96,165,250,0.16);
+    }
+
+    .btn-red {
+      background: linear-gradient(180deg, rgba(185,28,28,0.22), rgba(127,29,29,0.12));
+      color: #fee2e2;
+      border-color: rgba(252,165,165,0.16);
+      min-height: 38px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .big-panel {
+      text-align: center;
+      padding: 18px 14px 16px;
+    }
+
+    .big-label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .big-score {
+      margin-top: 8px;
+      font-size: 46px;
+      line-height: 1;
+      font-weight: 900;
+      color: #fff7d6;
+      letter-spacing: 0.02em;
+      text-shadow: 0 0 18px rgba(212,175,55,0.12);
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .mini {
+      border: 1px solid rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .mini span:first-child {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .mini strong {
+      font-size: 24px;
+      font-weight: 900;
+    }
+
     .progress-wrap {
+      margin-top: 14px;
       height: 14px;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.98);
       overflow: hidden;
+      background: rgba(15,23,42,0.98);
       border: 1px solid rgba(212,175,55,0.10);
     }
 
@@ -115,115 +253,155 @@
       height: 100%;
       width: 0%;
       border-radius: 999px;
-      background: linear-gradient(90deg, #d4af37, #f5d05e, #8b5cf6);
-      transition: width 0.25s ease;
+      background: linear-gradient(90deg, var(--gold), var(--gold-2), var(--violet));
+      transition: width .24s ease;
+    }
+
+    .status {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .action-btn {
+      min-height: 92px;
+      font-size: 22px;
+      letter-spacing: 0.03em;
+    }
+
+    .history-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .history-count {
+      font-size: 12px;
+      color: var(--muted);
     }
 
     .record-card {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
       border: 1px solid rgba(212,175,55,0.10);
       background: rgba(255,255,255,0.03);
       border-radius: 16px;
-      padding: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
     }
 
-    .hidden {
-      display: none;
+    .record-main {
+      min-width: 0;
+    }
+
+    .record-time {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .record-score {
+      margin-top: 5px;
+      font-size: 15px;
+      font-weight: 900;
+      color: #fef3c7;
+    }
+
+    .empty {
+      border: 1px dashed rgba(255,255,255,0.10);
+      border-radius: 16px;
+      padding: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      background: rgba(255,255,255,0.03);
     }
   </style>
 </head>
 <body>
-  <div class="max-w-4xl mx-auto px-4 py-8 md:px-6">
-    <div class="title-panel rounded-[24px] p-6 md:p-8 mb-6">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <div class="tag mb-3">Tower of Saviors Style</div>
-          <h1 class="text-3xl md:text-4xl font-black text-yellow-100 tracking-wide">公会任务分数计算器</h1>
-          <p class="mt-3 text-sm md:text-base text-slate-300 leading-7">
-            极简版。主页面只保留普通与特别两个按钮，其余项目都放进设置。
-          </p>
-        </div>
-        <button id="openSettingsBtn" class="btn btn-blue">设置</button>
-      </div>
+  <div class="wrap">
+    <div class="hero">
+      <button id="openSettingsBtn" class="settings-toggle">设置</button>
+      <div class="tag">神魔之塔风格</div>
+      <h1 class="title">公会分数</h1>
+      <p class="sub">主页面只保留两个记录按钮，其余内容都收进设置里。</p>
     </div>
 
-    <div id="settingsPanel" class="panel rounded-3xl p-5 md:p-6 mb-6 hidden">
-      <div class="flex items-center justify-between gap-3 mb-4">
-        <h2 class="text-lg font-bold text-yellow-100">设置</h2>
-        <button id="closeSettingsBtn" class="btn btn-blue">关闭</button>
+    <section id="settingsPanel" class="card settings">
+      <div class="history-title">
+        <h2 class="section-title" style="margin:0;">设置</h2>
+        <button id="closeSettingsBtn" class="btn btn-blue" style="min-height:38px;padding:8px 12px;">关闭</button>
       </div>
 
-      <div class="grid gap-4 md:grid-cols-2">
-        <div>
-          <label class="block text-sm font-semibold text-slate-300 mb-2">目标分数</label>
-          <input id="target" class="input" type="number" min="0" value="20000" />
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-slate-300 mb-2">目前已有分数</label>
-          <input id="initialCurrent" class="input" type="number" min="0" value="0" />
-        </div>
+      <div>
+        <label class="label">目标分数</label>
+        <input id="target" class="input" type="number" min="0" value="20000" />
       </div>
 
-      <div class="mt-5 grid gap-3 grid-cols-2">
+      <div style="margin-top:12px;">
+        <label class="label">目前已有分数</label>
+        <input id="initialCurrent" class="input" type="number" min="0" value="0" />
+      </div>
+
+      <div class="row-2" style="margin-top:12px;">
         <button id="startBtn" class="btn btn-gold">开始</button>
         <button id="resetAllBtn" class="btn btn-blue">重置</button>
       </div>
 
-      <div class="mt-5 rounded-2xl border border-yellow-400/10 bg-white/5 p-4 text-sm text-slate-400 leading-7">
-        - 目标分数预设 20000，可手动修改<br>
-        - 普通奖励固定 40 分<br>
-        - 特别奖励固定 200 分<br>
-        - 尚需体力按普通奖励 40 分推算
-      </div>
-    </div>
-
-    <section class="panel rounded-3xl p-5 md:p-6">
-      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-5">
-        <div class="metric">
-          <div class="text-sm text-slate-400">目前总分</div>
-          <div id="currentDisplay" class="mt-2 text-3xl font-black text-yellow-50">0</div>
-        </div>
-        <div class="metric">
-          <div class="text-sm text-slate-400">距离目标</div>
-          <div id="remainingDisplay" class="mt-2 text-3xl font-black text-cyan-50">0</div>
-        </div>
-        <div class="metric">
-          <div class="text-sm text-slate-400">尚需体力</div>
-          <div id="staminaDisplay" class="mt-2 text-3xl font-black text-violet-50">0</div>
-        </div>
-        <div class="metric">
-          <div class="text-sm text-slate-400">普通还要几次</div>
-          <div id="normalRunsDisplay" class="mt-2 text-3xl font-black text-emerald-50">0</div>
-        </div>
-      </div>
-
-      <div class="mb-5">
-        <div class="mb-2 flex items-center justify-between text-sm text-slate-300">
-          <span>完成进度</span>
-          <span id="progressText">0%</span>
-        </div>
-        <div class="progress-wrap">
-          <div id="progressBar" class="progress-bar"></div>
-        </div>
-        <div id="statusText" class="mt-3 text-sm text-slate-400"></div>
-      </div>
-
-      <div class="grid gap-3 grid-cols-2">
-        <button id="addNormalBtn" class="btn btn-gold">普通 +40</button>
-        <button id="addSpecialBtn" class="btn btn-violet">特别 +200</button>
+      <div class="status" style="text-align:left;margin-top:12px;">
+        普通固定 40 分，特别固定 200 分，尚需体力按普通 40 分去推算。
       </div>
     </section>
 
-    <section class="panel rounded-3xl p-5 md:p-6 mt-6">
-      <div class="mb-4 flex items-center justify-between gap-3">
-        <h2 class="text-lg font-bold text-yellow-100">记录历史</h2>
-        <div id="historyCount" class="text-sm text-slate-400">共 0 笔记录</div>
+    <section class="card big-panel">
+      <div class="big-label">目前总分</div>
+      <div id="currentDisplay" class="big-score">0</div>
+
+      <div class="mini-grid">
+        <div class="mini">
+          <span>距离目标</span>
+          <strong id="remainingDisplay" style="color:#cffafe;">0</strong>
+        </div>
+        <div class="mini">
+          <span>尚需体力</span>
+          <strong id="staminaDisplay" style="color:#ede9fe;">0</strong>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+      <div id="statusText" class="status"></div>
+
+      <div class="action-grid">
+        <button id="addNormalBtn" class="btn btn-gold action-btn">普通<br>+40</button>
+        <button id="addSpecialBtn" class="btn btn-violet action-btn">特别<br>+200</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="history-title">
+        <h2 class="section-title" style="margin:0;">记录</h2>
+        <div id="historyCount" class="history-count">共 0 笔</div>
       </div>
       <div id="historyWrap"></div>
     </section>
   </div>
 
   <script>
-    const STORAGE_KEY = 'tos-guild-score-tracker-v5';
+    const STORAGE_KEY = 'tos-guild-score-tracker-v6';
     const NORMAL_SCORE = 40;
     const SPECIAL_SCORE = 200;
     const STAMINA_PER_RUN = 40;
@@ -234,8 +412,6 @@
       currentDisplay: document.getElementById('currentDisplay'),
       remainingDisplay: document.getElementById('remainingDisplay'),
       staminaDisplay: document.getElementById('staminaDisplay'),
-      normalRunsDisplay: document.getElementById('normalRunsDisplay'),
-      progressText: document.getElementById('progressText'),
       progressBar: document.getElementById('progressBar'),
       statusText: document.getElementById('statusText'),
       addNormalBtn: document.getElementById('addNormalBtn'),
@@ -305,8 +481,8 @@
     }
 
     function renderSettings() {
-      if (state.settingsOpen) el.settingsPanel.classList.remove('hidden');
-      else el.settingsPanel.classList.add('hidden');
+      if (state.settingsOpen) el.settingsPanel.classList.add('show');
+      else el.settingsPanel.classList.remove('show');
     }
 
     function startTracking() {
@@ -314,15 +490,15 @@
       state.initialCurrent = Math.max(0, Number(el.initialCurrent.value) || 0);
       state.started = true;
       saveState();
-      render();
       closeSettings();
+      render();
       alert('已开始记录');
     }
 
     function addScore(type) {
       if (!state.started) {
         openSettings();
-        alert('请先在设置里输入目前分数后按开始');
+        alert('请先到设置里输入目前分数，再按开始');
         return;
       }
 
@@ -332,7 +508,6 @@
       state.history.unshift({
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         time: nowText(),
-        type,
         typeLabel,
         score
       });
@@ -362,26 +537,20 @@
     }
 
     function renderHistory() {
-      el.historyCount.textContent = `共 ${state.history.length} 笔记录`;
+      el.historyCount.textContent = `共 ${state.history.length} 笔`;
 
       if (!state.history.length) {
-        el.historyWrap.innerHTML = `
-          <div class="rounded-2xl border border-dashed border-white/10 bg-white/5 p-5 text-sm text-slate-400">
-            目前还没有记录。
-          </div>
-        `;
+        el.historyWrap.innerHTML = `<div class="empty">目前还没有记录</div>`;
         return;
       }
 
       el.historyWrap.innerHTML = state.history.map((item, index) => `
-        <div class="record-card mb-3">
-          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <div class="text-sm text-slate-500">#${state.history.length - index} ・ ${item.time}</div>
-              <div class="mt-1 text-base font-bold text-yellow-100">+${item.score} 分 ・ ${item.typeLabel}</div>
-            </div>
-            <button class="btn btn-red" onclick="deleteLog('${item.id}')">删除</button>
+        <div class="record-card">
+          <div class="record-main">
+            <div class="record-time">#${state.history.length - index} ・ ${item.time}</div>
+            <div class="record-score">+${item.score} 分 ・ ${item.typeLabel}</div>
           </div>
+          <button class="btn btn-red" onclick="deleteLog('${item.id}')">删除</button>
         </div>
       `).join('');
     }
@@ -397,16 +566,14 @@
       el.currentDisplay.textContent = current.toLocaleString();
       el.remainingDisplay.textContent = remaining.toLocaleString();
       el.staminaDisplay.textContent = stamina.toLocaleString();
-      el.normalRunsDisplay.textContent = normalRuns.toLocaleString();
-      el.progressText.textContent = `${progress.toFixed(1)}%`;
       el.progressBar.style.width = `${progress}%`;
 
       if (!state.started) {
-        el.statusText.textContent = '请先到设置里输入目前已有分数，然后按开始。';
+        el.statusText.textContent = '请先到设置里输入目前已有分数，然后按开始';
       } else if (current >= target) {
-        el.statusText.textContent = `已达标，目前 ${current.toLocaleString()} 分。`;
+        el.statusText.textContent = `已达标，目前 ${current.toLocaleString()} 分`;
       } else {
-        el.statusText.textContent = `距离目标还差 ${remaining.toLocaleString()} 分，按普通奖励 40 分推算，还需要 ${normalRuns.toLocaleString()} 次，约 ${stamina.toLocaleString()} 体力。`;
+        el.statusText.textContent = `还差 ${remaining.toLocaleString()} 分，按普通 40 分推算，还要 ${normalRuns.toLocaleString()} 次，约 ${stamina.toLocaleString()} 体力`;
       }
 
       renderHistory();
