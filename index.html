@@ -1,343 +1,547 @@
-export default function TosGuildScoreCalculator() {
-  const { useEffect, useMemo, useState } = React;
-
-  const [target, setTarget] = useState(5000);
-  const [current, setCurrent] = useState(0);
-  const [normalScore, setNormalScore] = useState(40);
-  const [specialScore, setSpecialScore] = useState(200);
-  const [logType, setLogType] = useState("normal");
-  const [customScore, setCustomScore] = useState(40);
-  const [logNote, setLogNote] = useState("");
-  const [history, setHistory] = useState(() => {
-    try {
-      const saved = localStorage.getItem("tos-guild-score-history");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("tos-guild-score-history", JSON.stringify(history));
-    } catch {}
-  }, [history]);
-
-  useEffect(() => {
-    const total = history.reduce((sum, item) => sum + Number(item.score || 0), 0);
-    setCurrent(total);
-  }, [history]);
-
-  const nowText = () => {
-    const d = new Date();
-    const pad = (n) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  };
-
-  const addLog = () => {
-    const scoreMap = {
-      normal: Number(normalScore) || 40,
-      special: Number(specialScore) || 200,
-      custom: Number(customScore) || 0,
-    };
-
-    const score = Math.max(0, scoreMap[logType] || 0);
-    if (!score) return;
-
-    const typeLabel = {
-      normal: "普通任务",
-      special: "特别任务",
-      custom: "自订分数",
-    };
-
-    const newItem = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      time: nowText(),
-      type: logType,
-      typeLabel: typeLabel[logType],
-      score,
-      note: logNote.trim(),
-    };
-
-    setHistory((prev) => [newItem, ...prev]);
-    setLogNote("");
-  };
-
-  const deleteLog = (id) => {
-    setHistory((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const clearLogs = () => {
-    setHistory([]);
-  };
-
-  const result = useMemo(() => {
-    const safeTarget = Math.max(0, Number(target) || 0);
-    const safeCurrent = Math.max(0, Number(current) || 0);
-    const n = Math.max(1, Number(normalScore) || 40);
-    const s = Math.max(1, Number(specialScore) || 200);
-
-    const remaining = Math.max(0, safeTarget - safeCurrent);
-    const normalOnly = Math.ceil(remaining / n);
-    const specialOnly = Math.ceil(remaining / s);
-
-    const mixes = [];
-    for (let special = 0; special <= Math.ceil(remaining / s) + 2; special++) {
-      const earnedBySpecial = special * s;
-      const rest = Math.max(0, remaining - earnedBySpecial);
-      const normal = Math.ceil(rest / n);
-      const total = earnedBySpecial + normal * n;
-      const extra = Math.max(0, safeCurrent + total - safeTarget);
-      mixes.push({ special, normal, totalRuns: special + normal, totalScore: total, extra });
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>神魔之塔 公会任务分数计算器</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(250,204,21,0.16), transparent 35%),
+        linear-gradient(180deg, #130f1f 0%, #0b1020 55%, #05070f 100%);
+      color: white;
+      min-height: 100vh;
     }
 
-    const bestByLeastRuns = [...mixes].sort((a, b) => {
-      if (a.totalRuns !== b.totalRuns) return a.totalRuns - b.totalRuns;
-      if (a.extra !== b.extra) return a.extra - b.extra;
-      return b.special - a.special;
-    })[0];
+    .glass {
+      border: 1px solid rgba(250, 204, 21, 0.18);
+      background: rgba(15, 23, 42, 0.76);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+    }
 
-    const bestByLeastWaste = [...mixes].sort((a, b) => {
-      if (a.extra !== b.extra) return a.extra - b.extra;
-      if (a.totalRuns !== b.totalRuns) return a.totalRuns - b.totalRuns;
-      return b.special - a.special;
-    }).slice(0, 8);
+    .input {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(250, 204, 21, 0.2);
+      background: rgba(2, 6, 23, 0.8);
+      color: white;
+      padding: 12px 14px;
+      outline: none;
+    }
 
-    const progress = safeTarget === 0 ? 100 : Math.min(100, (safeCurrent / safeTarget) * 100);
+    .input:focus {
+      border-color: rgba(253, 224, 71, 0.7);
+      box-shadow: 0 0 0 3px rgba(253, 224, 71, 0.14);
+    }
 
-    return {
-      safeTarget,
-      safeCurrent,
-      remaining,
-      normalOnly,
-      specialOnly,
-      bestByLeastRuns,
-      bestByLeastWaste,
-      progress,
-      reached: safeCurrent >= safeTarget,
-    };
-  }, [target, current, normalScore, specialScore]);
+    .btn {
+      border-radius: 16px;
+      padding: 12px 16px;
+      font-weight: 700;
+      transition: 0.2s ease;
+      border: 1px solid rgba(255,255,255,0.12);
+      cursor: pointer;
+    }
 
-  const card = "rounded-3xl border border-yellow-500/25 bg-slate-900/75 shadow-2xl shadow-black/30 backdrop-blur";
-  const label = "mb-2 block text-sm font-semibold tracking-wide text-yellow-200/90";
-  const input = "w-full rounded-2xl border border-yellow-400/25 bg-slate-950/80 px-4 py-3 text-base text-white outline-none transition focus:border-yellow-300 focus:ring-2 focus:ring-yellow-300/25";
-  const smallBtn = "rounded-2xl border px-3 py-2 text-sm font-bold transition";
+    .btn:hover {
+      transform: translateY(-1px);
+    }
 
-  return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.18),_transparent_35%),linear-gradient(180deg,_#130f1f_0%,_#0b1020_55%,_#05070f_100%)] text-white">
-      <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 lg:px-8">
-        <div className="mb-8 overflow-hidden rounded-[28px] border border-yellow-400/25 bg-black/35 shadow-2xl shadow-black/40">
-          <div className="relative p-6 md:p-8">
-            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(251,191,36,0.10),transparent_45%,rgba(168,85,247,0.10))]" />
-            <div className="relative">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-yellow-300/30 bg-yellow-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.22em] text-yellow-200">
-                神魔之塔风格
-              </div>
-              <h1 className="text-3xl font-black tracking-wide text-yellow-100 md:text-5xl">
-                公会任务分数计算器
-              </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-200 md:text-base">
-                可自订目标分数、任务分值，并且记录每一次加分的时间、类型、备注与累计进度。
-              </p>
-            </div>
-          </div>
+    .btn-yellow {
+      background: rgba(250, 204, 21, 0.12);
+      color: #fef3c7;
+      border-color: rgba(253, 224, 71, 0.25);
+    }
+
+    .btn-cyan {
+      background: rgba(34, 211, 238, 0.12);
+      color: #cffafe;
+      border-color: rgba(103, 232, 249, 0.25);
+    }
+
+    .btn-pink {
+      background: rgba(232, 121, 249, 0.12);
+      color: #fae8ff;
+      border-color: rgba(240, 171, 252, 0.25);
+    }
+
+    .btn-red {
+      background: rgba(248, 113, 113, 0.1);
+      color: #ffe4e6;
+      border-color: rgba(252, 165, 165, 0.25);
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      background: rgba(250, 204, 21, 0.12);
+      border: 1px solid rgba(253, 224, 71, 0.2);
+      color: #fde68a;
+    }
+
+    .progress-wrap {
+      height: 16px;
+      border-radius: 999px;
+      background: #1e293b;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #facc15, #f59e0b, #a855f7);
+      transition: width 0.3s ease;
+    }
+
+    .record-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .table-head, .table-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .table-head {
+      background: rgba(250, 204, 21, 0.1);
+      color: #fde68a;
+      font-weight: 700;
+      padding: 12px 16px;
+    }
+
+    .table-row {
+      padding: 12px 16px;
+      color: #cbd5e1;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    @media (max-width: 900px) {
+      .table-head, .table-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="max-w-7xl mx-auto px-4 py-8 md:px-6 lg:px-8">
+    <div class="mb-8 rounded-[28px] border border-yellow-400/20 bg-black/30 shadow-2xl overflow-hidden">
+      <div class="relative p-6 md:p-8">
+        <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(251,191,36,0.10),transparent_45%,rgba(168,85,247,0.10))]"></div>
+        <div class="relative">
+          <div class="tag mb-3">神魔之塔风格</div>
+          <h1 class="text-3xl md:text-5xl font-black text-yellow-100 tracking-wide">公会任务分数计算器</h1>
+          <p class="mt-3 text-slate-200 text-sm md:text-base leading-7 max-w-3xl">
+            可自订目标分数、普通任务分数、特别任务分数，并记录每次加分的时间、类型与备注。
+          </p>
         </div>
+      </div>
+    </div>
 
-        <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-          <div className="grid gap-6">
-            <section className={`${card} p-5 md:p-6`}>
-              <h2 className="mb-5 text-xl font-bold text-yellow-100">基础设定</h2>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label className={label}>目标分数</label>
-                  <input className={input} type="number" min="0" value={target} onChange={(e) => setTarget(e.target.value)} />
-                </div>
-                <div>
-                  <label className={label}>目前总分</label>
-                  <input className={`${input} opacity-80`} type="number" min="0" value={current} readOnly />
-                </div>
-                <div>
-                  <label className={label}>普通任务分数</label>
-                  <input className={input} type="number" min="1" value={normalScore} onChange={(e) => setNormalScore(e.target.value)} />
-                </div>
-                <div>
-                  <label className={label}>特别任务分数</label>
-                  <input className={input} type="number" min="1" value={specialScore} onChange={(e) => setSpecialScore(e.target.value)} />
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                <button
-                  onClick={() => {
-                    setTarget(5000);
-                    setNormalScore(40);
-                    setSpecialScore(200);
-                  }}
-                  className="rounded-2xl border border-yellow-300/30 bg-yellow-400/10 px-4 py-3 font-bold text-yellow-100 transition hover:bg-yellow-400/20"
-                >
-                  预设常用值
-                </button>
-                <button
-                  onClick={() => setTarget(current)}
-                  className="rounded-2xl border border-cyan-300/30 bg-cyan-400/10 px-4 py-3 font-bold text-cyan-100 transition hover:bg-cyan-400/20"
-                >
-                  目标设为当前分数
-                </button>
-                <button
-                  onClick={clearLogs}
-                  className="rounded-2xl border border-fuchsia-300/30 bg-fuchsia-400/10 px-4 py-3 font-bold text-fuchsia-100 transition hover:bg-fuchsia-400/20"
-                >
-                  清空全部记录
-                </button>
-              </div>
-
-              <div className="mt-7 rounded-3xl border border-yellow-400/20 bg-black/30 p-4">
-                <div className="mb-2 flex items-center justify-between text-sm text-slate-200">
-                  <span>目前进度</span>
-                  <span>{result.progress.toFixed(1)}%</span>
-                </div>
-                <div className="h-4 overflow-hidden rounded-full bg-slate-800">
-                  <div
-                    className="h-full rounded-full bg-[linear-gradient(90deg,#facc15,#f59e0b,#a855f7)] transition-all duration-300"
-                    style={{ width: `${result.progress}%` }}
-                  />
-                </div>
-                <div className="mt-3 text-sm text-slate-300">
-                  {result.reached
-                    ? `已达标，目前 ${result.safeCurrent.toLocaleString()} 分。`
-                    : `距离目标还差 ${result.remaining.toLocaleString()} 分。`}
-                </div>
-              </div>
-            </section>
-
-            <section className={`${card} p-5 md:p-6`}>
-              <h2 className="mb-5 text-xl font-bold text-yellow-100">新增分数记录</h2>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label className={label}>记录类型</label>
-                  <select className={input} value={logType} onChange={(e) => setLogType(e.target.value)}>
-                    <option value="normal">普通任务</option>
-                    <option value="special">特别任务</option>
-                    <option value="custom">自订分数</option>
-                  </select>
-                </div>
-                <div>
-                  <label className={label}>本次增加分数</label>
-                  <input
-                    className={input}
-                    type="number"
-                    min="0"
-                    value={logType === "normal" ? normalScore : logType === "special" ? specialScore : customScore}
-                    onChange={(e) => {
-                      if (logType === "normal") setNormalScore(e.target.value);
-                      else if (logType === "special") setSpecialScore(e.target.value);
-                      else setCustomScore(e.target.value);
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="mt-4">
-                <label className={label}>备注</label>
-                <input className={input} type="text" placeholder="例如：今晚打完特别任务、队友补分、手动登记" value={logNote} onChange={(e) => setLogNote(e.target.value)} />
-              </div>
-              <div className="mt-4 flex flex-wrap gap-3">
-                <button
-                  onClick={addLog}
-                  className="rounded-2xl border border-yellow-300/30 bg-yellow-400/15 px-5 py-3 font-bold text-yellow-100 transition hover:bg-yellow-400/25"
-                >
-                  添加记录
-                </button>
-                <div className="inline-flex items-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
-                  系统会自动记录添加时间
-                </div>
-              </div>
-            </section>
-          </div>
-
-          <div className="grid gap-6">
-            <section className={`${card} p-5 md:p-6`}>
-              <h2 className="mb-4 text-xl font-bold text-yellow-100">快速结果</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-3xl border border-yellow-300/20 bg-yellow-400/10 p-4">
-                  <div className="text-sm text-yellow-100/80">只打普通任务</div>
-                  <div className="mt-2 text-3xl font-black text-yellow-50">{result.normalOnly}</div>
-                  <div className="mt-1 text-sm text-yellow-100/80">次</div>
-                </div>
-                <div className="rounded-3xl border border-purple-300/20 bg-purple-400/10 p-4">
-                  <div className="text-sm text-purple-100/80">只打特别任务</div>
-                  <div className="mt-2 text-3xl font-black text-purple-50">{result.specialOnly}</div>
-                  <div className="mt-1 text-sm text-purple-100/80">次</div>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-3xl border border-cyan-300/20 bg-cyan-400/10 p-4">
-                <div className="text-sm text-cyan-100/80">最省次数组合</div>
-                <div className="mt-3 grid gap-2 text-sm text-cyan-50">
-                  <div>特别任务：<span className="font-bold">{result.bestByLeastRuns?.special ?? 0}</span> 次</div>
-                  <div>普通任务：<span className="font-bold">{result.bestByLeastRuns?.normal ?? 0}</span> 次</div>
-                  <div>总次数：<span className="font-bold">{result.bestByLeastRuns?.totalRuns ?? 0}</span> 次</div>
-                  <div>超出目标：<span className="font-bold">{result.bestByLeastRuns?.extra ?? 0}</span> 分</div>
-                </div>
-              </div>
-            </section>
-
-            <section className={`${card} p-5 md:p-6`}>
-              <h2 className="mb-4 text-xl font-bold text-yellow-100">推荐组合</h2>
-              <div className="overflow-hidden rounded-3xl border border-yellow-300/15">
-                <div className="grid grid-cols-4 bg-yellow-400/10 px-4 py-3 text-sm font-bold text-yellow-100">
-                  <div>特别</div>
-                  <div>普通</div>
-                  <div>总次数</div>
-                  <div>超出分数</div>
-                </div>
-                <div className="divide-y divide-white/8 bg-black/20">
-                  {result.bestByLeastWaste.map((row, idx) => (
-                    <div key={`${row.special}-${row.normal}-${idx}`} className="grid grid-cols-4 px-4 py-3 text-sm text-slate-200">
-                      <div>{row.special}</div>
-                      <div>{row.normal}</div>
-                      <div className="font-semibold text-white">{row.totalRuns}</div>
-                      <div>{row.extra}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
-
-        <section className={`${card} mt-6 p-5 md:p-6`}>
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-bold text-yellow-100">分数记录历史</h2>
-            <div className="text-sm text-slate-300">共 {history.length} 笔记录</div>
-          </div>
-
-          {history.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-white/15 bg-white/5 p-6 text-sm text-slate-300">
-              目前还没有记录。你每次加分后按一下 添加记录，就会自动记下时间与分数。
+    <div class="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+      <div class="grid gap-6">
+        <section class="glass rounded-3xl p-5 md:p-6">
+          <h2 class="text-xl font-bold text-yellow-100 mb-5">基础设定</h2>
+          <div class="grid gap-4 md:grid-cols-2">
+            <div>
+              <label class="block text-sm font-semibold text-yellow-200/90 mb-2">目标分数</label>
+              <input id="target" class="input" type="number" min="0" value="5000" />
             </div>
-          ) : (
-            <div className="space-y-3">
-              {history.map((item, index) => (
-                <div key={item.id} className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <div className="text-sm text-slate-400">#{history.length - index} ・ {item.time}</div>
-                      <div className="mt-1 text-lg font-bold text-yellow-100">+{item.score} 分 ・ {item.typeLabel}</div>
-                      <div className="mt-1 text-sm text-slate-300">{item.note || "没有备注"}</div>
-                    </div>
-                    <button
-                      onClick={() => deleteLog(item.id)}
-                      className={`${smallBtn} border-rose-300/25 bg-rose-400/10 text-rose-100 hover:bg-rose-400/20`}
-                    >
-                      删除
-                    </button>
-                  </div>
-                </div>
-              ))}
+            <div>
+              <label class="block text-sm font-semibold text-yellow-200/90 mb-2">目前总分</label>
+              <input id="current" class="input opacity-80" type="number" readonly />
             </div>
-          )}
+            <div>
+              <label class="block text-sm font-semibold text-yellow-200/90 mb-2">普通任务分数</label>
+              <input id="normalScore" class="input" type="number" min="1" value="40" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-yellow-200/90 mb-2">特别任务分数</label>
+              <input id="specialScore" class="input" type="number" min="1" value="200" />
+            </div>
+          </div>
+
+          <div class="mt-6 grid gap-3 sm:grid-cols-3">
+            <button id="presetBtn" class="btn btn-yellow">预设常用值</button>
+            <button id="setTargetToCurrentBtn" class="btn btn-cyan">目标设为当前分数</button>
+            <button id="clearLogsBtn" class="btn btn-pink">清空全部记录</button>
+          </div>
+
+          <div class="mt-7 rounded-3xl border border-yellow-400/20 bg-black/30 p-4">
+            <div class="mb-2 flex items-center justify-between text-sm text-slate-200">
+              <span>目前进度</span>
+              <span id="progressText">0%</span>
+            </div>
+            <div class="progress-wrap">
+              <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <div id="remainingText" class="mt-3 text-sm text-slate-300"></div>
+          </div>
+        </section>
+
+        <section class="glass rounded-3xl p-5 md:p-6">
+          <h2 class="text-xl font-bold text-yellow-100 mb-5">新增分数记录</h2>
+          <div class="grid gap-4 md:grid-cols-2">
+            <div>
+              <label class="block text-sm font-semibold text-yellow-200/90 mb-2">记录类型</label>
+              <select id="logType" class="input">
+                <option value="normal">普通任务</option>
+                <option value="special">特别任务</option>
+                <option value="custom">自订分数</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-yellow-200/90 mb-2">本次增加分数</label>
+              <input id="logScore" class="input" type="number" min="0" value="40" />
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label class="block text-sm font-semibold text-yellow-200/90 mb-2">备注</label>
+            <input id="logNote" class="input" type="text" placeholder="例如：今晚打完特别任务、队友补分、手动登记" />
+          </div>
+
+          <div class="mt-4 flex flex-wrap gap-3">
+            <button id="addLogBtn" class="btn btn-yellow">添加记录</button>
+            <div class="inline-flex items-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
+              系统会自动记录添加时间
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="grid gap-6">
+        <section class="glass rounded-3xl p-5 md:p-6">
+          <h2 class="text-xl font-bold text-yellow-100 mb-4">快速结果</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="rounded-3xl border border-yellow-300/20 bg-yellow-400/10 p-4">
+              <div class="text-sm text-yellow-100/80">只打普通任务</div>
+              <div id="normalOnly" class="mt-2 text-3xl font-black text-yellow-50">0</div>
+              <div class="mt-1 text-sm text-yellow-100/80">次</div>
+            </div>
+            <div class="rounded-3xl border border-purple-300/20 bg-purple-400/10 p-4">
+              <div class="text-sm text-purple-100/80">只打特别任务</div>
+              <div id="specialOnly" class="mt-2 text-3xl font-black text-purple-50">0</div>
+              <div class="mt-1 text-sm text-purple-100/80">次</div>
+            </div>
+          </div>
+
+          <div class="mt-4 rounded-3xl border border-cyan-300/20 bg-cyan-400/10 p-4">
+            <div class="text-sm text-cyan-100/80">最省次数组合</div>
+            <div class="mt-3 grid gap-2 text-sm text-cyan-50">
+              <div>特别任务：<span id="bestSpecial" class="font-bold">0</span> 次</div>
+              <div>普通任务：<span id="bestNormal" class="font-bold">0</span> 次</div>
+              <div>总次数：<span id="bestTotalRuns" class="font-bold">0</span> 次</div>
+              <div>超出目标：<span id="bestExtra" class="font-bold">0</span> 分</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="glass rounded-3xl p-5 md:p-6">
+          <h2 class="text-xl font-bold text-yellow-100 mb-4">推荐组合</h2>
+          <div class="overflow-hidden rounded-3xl border border-yellow-300/15">
+            <div class="table-head">
+              <div>特别</div>
+              <div>普通</div>
+              <div>总次数</div>
+              <div>超出分数</div>
+            </div>
+            <div id="recommendList" class="bg-black/20"></div>
+          </div>
         </section>
       </div>
     </div>
-  );
-}
+
+    <section class="glass rounded-3xl p-5 md:p-6 mt-6">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <h2 class="text-xl font-bold text-yellow-100">分数记录历史</h2>
+        <div id="historyCount" class="text-sm text-slate-300">共 0 笔记录</div>
+      </div>
+      <div id="historyWrap"></div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "tos-guild-score-history";
+
+    const el = {
+      target: document.getElementById("target"),
+      current: document.getElementById("current"),
+      normalScore: document.getElementById("normalScore"),
+      specialScore: document.getElementById("specialScore"),
+      logType: document.getElementById("logType"),
+      logScore: document.getElementById("logScore"),
+      logNote: document.getElementById("logNote"),
+      progressText: document.getElementById("progressText"),
+      progressBar: document.getElementById("progressBar"),
+      remainingText: document.getElementById("remainingText"),
+      normalOnly: document.getElementById("normalOnly"),
+      specialOnly: document.getElementById("specialOnly"),
+      bestSpecial: document.getElementById("bestSpecial"),
+      bestNormal: document.getElementById("bestNormal"),
+      bestTotalRuns: document.getElementById("bestTotalRuns"),
+      bestExtra: document.getElementById("bestExtra"),
+      recommendList: document.getElementById("recommendList"),
+      historyWrap: document.getElementById("historyWrap"),
+      historyCount: document.getElementById("historyCount"),
+      presetBtn: document.getElementById("presetBtn"),
+      setTargetToCurrentBtn: document.getElementById("setTargetToCurrentBtn"),
+      clearLogsBtn: document.getElementById("clearLogsBtn"),
+      addLogBtn: document.getElementById("addLogBtn")
+    };
+
+    let history = loadHistory();
+
+    function loadHistory() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveHistory() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    }
+
+    function pad(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function nowText() {
+      const d = new Date();
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function getCurrentTotal() {
+      return history.reduce((sum, item) => sum + Number(item.score || 0), 0);
+    }
+
+    function getScoreTypeLabel(type) {
+      if (type === "normal") return "普通任务";
+      if (type === "special") return "特别任务";
+      return "自订分数";
+    }
+
+    function syncLogScoreByType() {
+      const type = el.logType.value;
+      if (type === "normal") el.logScore.value = Number(el.normalScore.value || 40);
+      else if (type === "special") el.logScore.value = Number(el.specialScore.value || 200);
+    }
+
+    function calculateResult() {
+      const target = Math.max(0, Number(el.target.value) || 0);
+      const current = Math.max(0, getCurrentTotal());
+      const normal = Math.max(1, Number(el.normalScore.value) || 40);
+      const special = Math.max(1, Number(el.specialScore.value) || 200);
+
+      const remaining = Math.max(0, target - current);
+      const normalOnly = Math.ceil(remaining / normal);
+      const specialOnly = Math.ceil(remaining / special);
+
+      const mixes = [];
+      for (let specialCount = 0; specialCount <= Math.ceil(remaining / special) + 2; specialCount++) {
+        const earnedBySpecial = specialCount * special;
+        const rest = Math.max(0, remaining - earnedBySpecial);
+        const normalCount = Math.ceil(rest / normal);
+        const total = earnedBySpecial + normalCount * normal;
+        const extra = Math.max(0, current + total - target);
+        mixes.push({
+          special: specialCount,
+          normal: normalCount,
+          totalRuns: specialCount + normalCount,
+          extra
+        });
+      }
+
+      const bestByLeastRuns = [...mixes].sort((a, b) => {
+        if (a.totalRuns !== b.totalRuns) return a.totalRuns - b.totalRuns;
+        if (a.extra !== b.extra) return a.extra - b.extra;
+        return b.special - a.special;
+      })[0] || { special: 0, normal: 0, totalRuns: 0, extra: 0 };
+
+      const bestByLeastWaste = [...mixes].sort((a, b) => {
+        if (a.extra !== b.extra) return a.extra - b.extra;
+        if (a.totalRuns !== b.totalRuns) return a.totalRuns - b.totalRuns;
+        return b.special - a.special;
+      }).slice(0, 8);
+
+      const progress = target === 0 ? 100 : Math.min(100, (current / target) * 100);
+
+      return {
+        target,
+        current,
+        remaining,
+        normalOnly,
+        specialOnly,
+        bestByLeastRuns,
+        bestByLeastWaste,
+        progress,
+        reached: current >= target
+      };
+    }
+
+    function renderRecommendList(rows) {
+      if (!rows.length) {
+        el.recommendList.innerHTML = `<div class="table-row"><div>0</div><div>0</div><div>0</div><div>0</div></div>`;
+        return;
+      }
+
+      el.recommendList.innerHTML = rows.map(row => `
+        <div class="table-row">
+          <div>${row.special}</div>
+          <div>${row.normal}</div>
+          <div class="font-semibold text-white">${row.totalRuns}</div>
+          <div>${row.extra}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderHistory() {
+      el.historyCount.textContent = `共 ${history.length} 笔记录`;
+
+      if (!history.length) {
+        el.historyWrap.innerHTML = `
+          <div class="rounded-3xl border border-dashed border-white/15 bg-white/5 p-6 text-sm text-slate-300">
+            目前还没有记录。你每次加分后按一下 添加记录，就会自动记下时间与分数。
+          </div>
+        `;
+        return;
+      }
+
+      el.historyWrap.innerHTML = history.map((item, index) => `
+        <div class="record-card mb-3">
+          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div class="text-sm text-slate-400">#${history.length - index} ・ ${item.time}</div>
+              <div class="mt-1 text-lg font-bold text-yellow-100">+${item.score} 分 ・ ${item.typeLabel}</div>
+              <div class="mt-1 text-sm text-slate-300">${item.note ? escapeHtml(item.note) : "没有备注"}</div>
+            </div>
+            <button class="btn btn-red" onclick="deleteLog('${item.id}')">删除</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function render() {
+      const result = calculateResult();
+
+      el.current.value = result.current;
+      el.progressText.textContent = `${result.progress.toFixed(1)}%`;
+      el.progressBar.style.width = `${result.progress}%`;
+
+      if (result.reached) {
+        el.remainingText.textContent = `已达标，目前 ${result.current.toLocaleString()} 分。`;
+      } else {
+        el.remainingText.textContent = `距离目标还差 ${result.remaining.toLocaleString()} 分。`;
+      }
+
+      el.normalOnly.textContent = result.normalOnly;
+      el.specialOnly.textContent = result.specialOnly;
+      el.bestSpecial.textContent = result.bestByLeastRuns.special;
+      el.bestNormal.textContent = result.bestByLeastRuns.normal;
+      el.bestTotalRuns.textContent = result.bestByLeastRuns.totalRuns;
+      el.bestExtra.textContent = result.bestByLeastRuns.extra;
+
+      renderRecommendList(result.bestByLeastWaste);
+      renderHistory();
+    }
+
+    function addLog() {
+      const score = Math.max(0, Number(el.logScore.value) || 0);
+      if (!score) {
+        alert("请输入有效分数");
+        return;
+      }
+
+      const type = el.logType.value;
+      const item = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        time: nowText(),
+        type,
+        typeLabel: getScoreTypeLabel(type),
+        score,
+        note: el.logNote.value.trim()
+      };
+
+      history.unshift(item);
+      saveHistory();
+      el.logNote.value = "";
+      render();
+    }
+
+    function deleteLog(id) {
+      history = history.filter(item => item.id !== id);
+      saveHistory();
+      render();
+    }
+
+    function clearLogs() {
+      if (!confirm("确定要清空全部记录吗？")) return;
+      history = [];
+      saveHistory();
+      render();
+    }
+
+    window.deleteLog = deleteLog;
+
+    el.logType.addEventListener("change", syncLogScoreByType);
+    el.normalScore.addEventListener("input", () => {
+      if (el.logType.value === "normal") el.logScore.value = el.normalScore.value;
+      render();
+    });
+    el.specialScore.addEventListener("input", () => {
+      if (el.logType.value === "special") el.logScore.value = el.specialScore.value;
+      render();
+    });
+    el.target.addEventListener("input", render);
+    el.logScore.addEventListener("input", render);
+    el.addLogBtn.addEventListener("click", addLog);
+    el.clearLogsBtn.addEventListener("click", clearLogs);
+
+    el.presetBtn.addEventListener("click", () => {
+      el.target.value = 5000;
+      el.normalScore.value = 40;
+      el.specialScore.value = 200;
+      syncLogScoreByType();
+      render();
+    });
+
+    el.setTargetToCurrentBtn.addEventListener("click", () => {
+      el.target.value = getCurrentTotal();
+      render();
+    });
+
+    syncLogScoreByType();
+    render();
+  </script>
+</body>
+</html>
