@@ -125,84 +125,93 @@
       border-radius: 16px;
       padding: 14px;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="max-w-4xl mx-auto px-4 py-8 md:px-6">
     <div class="title-panel rounded-[24px] p-6 md:p-8 mb-6">
-      <div class="tag mb-3">Tower of Saviors Style</div>
-      <h1 class="text-3xl md:text-4xl font-black text-yellow-100 tracking-wide">公会任务分数计算器</h1>
-      <p class="mt-3 text-sm md:text-base text-slate-300 leading-7">
-        极简版。先输入目前分数后按开始，之后只用普通与特别两个按钮记录。体力会用普通奖励 40 分去推算。
-      </p>
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <div class="tag mb-3">Tower of Saviors Style</div>
+          <h1 class="text-3xl md:text-4xl font-black text-yellow-100 tracking-wide">公会任务分数计算器</h1>
+          <p class="mt-3 text-sm md:text-base text-slate-300 leading-7">
+            极简版。主页面只保留普通与特别两个按钮，其余项目都放进设置。
+          </p>
+        </div>
+        <button id="openSettingsBtn" class="btn btn-blue">设置</button>
+      </div>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-      <section class="panel rounded-3xl p-5 md:p-6">
-        <h2 class="text-lg font-bold text-yellow-100 mb-4">开始</h2>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">目标分数</label>
-            <input id="target" class="input" type="number" min="0" value="20000" />
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">目前已有分数</label>
-            <input id="initialCurrent" class="input" type="number" min="0" value="0" />
-          </div>
-        </div>
+    <div id="settingsPanel" class="panel rounded-3xl p-5 md:p-6 mb-6 hidden">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <h2 class="text-lg font-bold text-yellow-100">设置</h2>
+        <button id="closeSettingsBtn" class="btn btn-blue">关闭</button>
+      </div>
 
-        <div class="mt-5 grid gap-3 grid-cols-2">
-          <button id="startBtn" class="btn btn-gold">开始</button>
-          <button id="resetAllBtn" class="btn btn-blue">重置</button>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <label class="block text-sm font-semibold text-slate-300 mb-2">目标分数</label>
+          <input id="target" class="input" type="number" min="0" value="20000" />
         </div>
-
-        <div class="mt-5 rounded-2xl border border-yellow-400/10 bg-white/5 p-4 text-sm text-slate-400 leading-7">
-          - 目标分数固定预设 20000，可手动修改<br>
-          - 普通奖励固定 40 分<br>
-          - 特别奖励固定 200 分<br>
-          - 尚需体力以普通奖励次数来推算
+        <div>
+          <label class="block text-sm font-semibold text-slate-300 mb-2">目前已有分数</label>
+          <input id="initialCurrent" class="input" type="number" min="0" value="0" />
         </div>
-      </section>
+      </div>
 
-      <section class="panel rounded-3xl p-5 md:p-6">
-        <h2 class="text-lg font-bold text-yellow-100 mb-4">进度</h2>
+      <div class="mt-5 grid gap-3 grid-cols-2">
+        <button id="startBtn" class="btn btn-gold">开始</button>
+        <button id="resetAllBtn" class="btn btn-blue">重置</button>
+      </div>
 
-        <div class="grid gap-3 sm:grid-cols-2">
-          <div class="metric">
-            <div class="text-sm text-slate-400">目前总分</div>
-            <div id="currentDisplay" class="mt-2 text-3xl font-black text-yellow-50">0</div>
-          </div>
-          <div class="metric">
-            <div class="text-sm text-slate-400">距离目标</div>
-            <div id="remainingDisplay" class="mt-2 text-3xl font-black text-cyan-50">0</div>
-          </div>
-          <div class="metric">
-            <div class="text-sm text-slate-400">尚需体力</div>
-            <div id="staminaDisplay" class="mt-2 text-3xl font-black text-violet-50">0</div>
-          </div>
-          <div class="metric">
-            <div class="text-sm text-slate-400">普通还要几次</div>
-            <div id="normalRunsDisplay" class="mt-2 text-3xl font-black text-emerald-50">0</div>
-          </div>
-        </div>
-
-        <div class="mt-5">
-          <div class="mb-2 flex items-center justify-between text-sm text-slate-300">
-            <span>完成进度</span>
-            <span id="progressText">0%</span>
-          </div>
-          <div class="progress-wrap">
-            <div id="progressBar" class="progress-bar"></div>
-          </div>
-          <div id="statusText" class="mt-3 text-sm text-slate-400"></div>
-        </div>
-
-        <div class="mt-5 grid gap-3 grid-cols-2">
-          <button id="addNormalBtn" class="btn btn-gold">普通 +40</button>
-          <button id="addSpecialBtn" class="btn btn-violet">特别 +200</button>
-        </div>
-      </section>
+      <div class="mt-5 rounded-2xl border border-yellow-400/10 bg-white/5 p-4 text-sm text-slate-400 leading-7">
+        - 目标分数预设 20000，可手动修改<br>
+        - 普通奖励固定 40 分<br>
+        - 特别奖励固定 200 分<br>
+        - 尚需体力按普通奖励 40 分推算
+      </div>
     </div>
+
+    <section class="panel rounded-3xl p-5 md:p-6">
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-5">
+        <div class="metric">
+          <div class="text-sm text-slate-400">目前总分</div>
+          <div id="currentDisplay" class="mt-2 text-3xl font-black text-yellow-50">0</div>
+        </div>
+        <div class="metric">
+          <div class="text-sm text-slate-400">距离目标</div>
+          <div id="remainingDisplay" class="mt-2 text-3xl font-black text-cyan-50">0</div>
+        </div>
+        <div class="metric">
+          <div class="text-sm text-slate-400">尚需体力</div>
+          <div id="staminaDisplay" class="mt-2 text-3xl font-black text-violet-50">0</div>
+        </div>
+        <div class="metric">
+          <div class="text-sm text-slate-400">普通还要几次</div>
+          <div id="normalRunsDisplay" class="mt-2 text-3xl font-black text-emerald-50">0</div>
+        </div>
+      </div>
+
+      <div class="mb-5">
+        <div class="mb-2 flex items-center justify-between text-sm text-slate-300">
+          <span>完成进度</span>
+          <span id="progressText">0%</span>
+        </div>
+        <div class="progress-wrap">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <div id="statusText" class="mt-3 text-sm text-slate-400"></div>
+      </div>
+
+      <div class="grid gap-3 grid-cols-2">
+        <button id="addNormalBtn" class="btn btn-gold">普通 +40</button>
+        <button id="addSpecialBtn" class="btn btn-violet">特别 +200</button>
+      </div>
+    </section>
 
     <section class="panel rounded-3xl p-5 md:p-6 mt-6">
       <div class="mb-4 flex items-center justify-between gap-3">
@@ -214,7 +223,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'tos-guild-score-tracker-v4';
+    const STORAGE_KEY = 'tos-guild-score-tracker-v5';
     const NORMAL_SCORE = 40;
     const SPECIAL_SCORE = 200;
     const STAMINA_PER_RUN = 40;
@@ -234,7 +243,10 @@
       startBtn: document.getElementById('startBtn'),
       resetAllBtn: document.getElementById('resetAllBtn'),
       historyCount: document.getElementById('historyCount'),
-      historyWrap: document.getElementById('historyWrap')
+      historyWrap: document.getElementById('historyWrap'),
+      openSettingsBtn: document.getElementById('openSettingsBtn'),
+      closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+      settingsPanel: document.getElementById('settingsPanel')
     };
 
     let state = loadState();
@@ -244,6 +256,7 @@
         target: 20000,
         initialCurrent: 0,
         started: false,
+        settingsOpen: false,
         history: []
       };
     }
@@ -279,18 +292,37 @@
       return Number(state.initialCurrent || 0) + getExtraScore();
     }
 
+    function openSettings() {
+      state.settingsOpen = true;
+      saveState();
+      renderSettings();
+    }
+
+    function closeSettings() {
+      state.settingsOpen = false;
+      saveState();
+      renderSettings();
+    }
+
+    function renderSettings() {
+      if (state.settingsOpen) el.settingsPanel.classList.remove('hidden');
+      else el.settingsPanel.classList.add('hidden');
+    }
+
     function startTracking() {
       state.target = Math.max(0, Number(el.target.value) || 0);
       state.initialCurrent = Math.max(0, Number(el.initialCurrent.value) || 0);
       state.started = true;
       saveState();
       render();
+      closeSettings();
       alert('已开始记录');
     }
 
     function addScore(type) {
       if (!state.started) {
-        alert('请先输入目前分数后按开始');
+        openSettings();
+        alert('请先在设置里输入目前分数后按开始');
         return;
       }
 
@@ -320,6 +352,7 @@
       state = defaultState();
       saveState();
       fillInputs();
+      renderSettings();
       render();
     }
 
@@ -369,7 +402,7 @@
       el.progressBar.style.width = `${progress}%`;
 
       if (!state.started) {
-        el.statusText.textContent = '请先输入目前已有分数，然后按开始。';
+        el.statusText.textContent = '请先到设置里输入目前已有分数，然后按开始。';
       } else if (current >= target) {
         el.statusText.textContent = `已达标，目前 ${current.toLocaleString()} 分。`;
       } else {
@@ -385,6 +418,8 @@
     el.addNormalBtn.addEventListener('click', () => addScore('normal'));
     el.addSpecialBtn.addEventListener('click', () => addScore('special'));
     el.resetAllBtn.addEventListener('click', resetAll);
+    el.openSettingsBtn.addEventListener('click', openSettings);
+    el.closeSettingsBtn.addEventListener('click', closeSettings);
 
     el.target.addEventListener('input', () => {
       state.target = Math.max(0, Number(el.target.value) || 0);
@@ -392,7 +427,14 @@
       render();
     });
 
+    el.initialCurrent.addEventListener('input', () => {
+      state.initialCurrent = Math.max(0, Number(el.initialCurrent.value) || 0);
+      saveState();
+      render();
+    });
+
     fillInputs();
+    renderSettings();
     render();
   </script>
 </body>
