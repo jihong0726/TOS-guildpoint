@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>公会积分</title>
+  <title>公会分数</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
@@ -13,15 +13,13 @@
       --蓝: #60a5fa;
       --底1: #07080d;
       --底2: #0c1220;
+      --板: rgba(12, 16, 28, 0.92);
       --线: rgba(212, 175, 55, 0.18);
       --字: #f8fafc;
       --淡: #94a3b8;
     }
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     body {
       margin: 0;
@@ -72,8 +70,6 @@
       font-size: 12px;
       font-weight: 800;
       letter-spacing: 0.08em;
-      position: relative;
-      z-index: 1;
     }
 
     .标题 {
@@ -82,8 +78,6 @@
       font-weight: 900;
       color: #fef3c7;
       letter-spacing: 0.03em;
-      position: relative;
-      z-index: 1;
     }
 
     .副文 {
@@ -91,8 +85,6 @@
       color: var(--淡);
       font-size: 13px;
       line-height: 1.7;
-      position: relative;
-      z-index: 1;
     }
 
     .设置按钮 {
@@ -107,7 +99,6 @@
       border-radius: 12px;
       font-weight: 800;
       cursor: pointer;
-      z-index: 2;
     }
 
     .卡 {
@@ -119,13 +110,8 @@
       padding: 14px;
     }
 
-    .设置区 {
-      display: none;
-    }
-
-    .设置区.show {
-      display: block;
-    }
+    .设置区 { display: none; }
+    .设置区.show { display: block; }
 
     .区标题 {
       margin: 0 0 12px;
@@ -174,14 +160,8 @@
       transition: transform .18s ease, filter .18s ease;
     }
 
-    .按钮:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-    }
-
-    .按钮:active {
-      transform: translateY(0);
-    }
+    .按钮:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .按钮:active { transform: translateY(0); }
 
     .金按钮 {
       background: linear-gradient(180deg, rgba(212,175,55,0.22), rgba(120,53,15,0.14));
@@ -309,7 +289,7 @@
       color: var(--淡);
     }
 
-    .记录卡 {
+        .记录卡 {
       display: flex;
       justify-content: space-between;
       gap: 12px;
@@ -321,20 +301,51 @@
       margin-bottom: 10px;
     }
 
-    .记录主体 {
-      min-width: 0;
+    .记录主体 { min-width: 0; }
+    .记录时间 { font-size: 12px; color: #64748b; }
+    .记录分数 { margin-top: 5px; font-size: 15px; font-weight: 900; color: #fef3c7; }
+
+    .记录列表 {
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 4px;
+      scroll-behavior: smooth;
     }
 
-    .记录时间 {
-      font-size: 12px;
-      color: #64748b;
+    .记录列表::-webkit-scrollbar {
+      width: 8px;
     }
 
-    .记录分数 {
-      margin-top: 5px;
-      font-size: 15px;
-      font-weight: 900;
+    .记录列表::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.03);
+      border-radius: 999px;
+    }
+
+    .记录列表::-webkit-scrollbar-thumb {
+      background: rgba(212,175,55,0.28);
+      border-radius: 999px;
+    }
+
+    .回顶按钮 {
+      position: fixed;
+      right: 16px;
+      bottom: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      border: 1px solid rgba(212,175,55,0.18);
+      background: linear-gradient(180deg, rgba(212,175,55,0.22), rgba(120,53,15,0.14));
       color: #fef3c7;
+      font-size: 20px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+      display: none;
+      z-index: 20;
+    }
+
+    .回顶按钮.show {
+      display: block;
     }
 
     .空状态 {
@@ -422,8 +433,10 @@
         <h2 class="区标题" style="margin:0;">记录历史</h2>
         <div id="historyCount" class="历史数量">共 0 笔</div>
       </div>
-      <div id="historyWrap"></div>
+      <div id="historyWrap" class="记录列表"></div>
     </section>
+
+    <button id="backToTopBtn" class="回顶按钮" title="回到最上方">↑</button>
   </div>
 
   <script>
@@ -450,7 +463,8 @@
       historyWrap: document.getElementById('historyWrap'),
       openSettingsBtn: document.getElementById('openSettingsBtn'),
       closeSettingsBtn: document.getElementById('closeSettingsBtn'),
-      settingsPanel: document.getElementById('settingsPanel')
+      settingsPanel: document.getElementById('settingsPanel'),
+      backToTopBtn: document.getElementById('backToTopBtn')
     };
 
     let state = 读取状态();
@@ -517,11 +531,8 @@
     }
 
     function 渲染设置() {
-      if (state.settingsOpen) {
-        el.settingsPanel.classList.add('show');
-      } else {
-        el.settingsPanel.classList.remove('show');
-      }
+      if (state.settingsOpen) el.settingsPanel.classList.add('show');
+      else el.settingsPanel.classList.remove('show');
     }
 
     function 开始记录() {
@@ -623,6 +634,15 @@
       渲染记录();
     }
 
+    function 处理回顶按钮() {
+      if (window.scrollY > 220) el.backToTopBtn.classList.add('show');
+      else el.backToTopBtn.classList.remove('show');
+    }
+
+    function 回到最上方() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     window.删除记录 = 删除记录;
 
     el.startBtn.addEventListener('click', 开始记录);
@@ -631,6 +651,8 @@
     el.resetAllBtn.addEventListener('click', 重置全部);
     el.openSettingsBtn.addEventListener('click', 打开设置);
     el.closeSettingsBtn.addEventListener('click', 关闭设置);
+    el.backToTopBtn.addEventListener('click', 回到最上方);
+    window.addEventListener('scroll', 处理回顶按钮);
 
     el.target.addEventListener('input', () => {
       state.target = Math.max(0, Number(el.target.value) || 0);
@@ -647,6 +669,7 @@
     填入设置值();
     渲染设置();
     渲染();
+    处理回顶按钮();
   </script>
 </body>
 </html>
