@@ -2,46 +2,47 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>神魔之塔公会分数</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>公会分数</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
-      --gold: #d4af37;
-      --gold-2: #f5d05e;
-      --violet: #8b5cf6;
-      --bg-1: #07080d;
-      --bg-2: #0c1220;
-      --panel: rgba(12, 16, 28, 0.92);
-      --line: rgba(212, 175, 55, 0.18);
-      --text: #f8fafc;
-      --muted: #94a3b8;
+      --金: #d4af37;
+      --亮金: #f5d05e;
+      --紫: #8b5cf6;
+      --蓝: #60a5fa;
+      --底1: #07080d;
+      --底2: #0c1220;
+      --板: rgba(12, 16, 28, 0.92);
+      --线: rgba(212, 175, 55, 0.18);
+      --字: #f8fafc;
+      --淡: #94a3b8;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     body {
       margin: 0;
       min-height: 100vh;
-      color: var(--text);
+      color: var(--字);
       font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
       background:
         radial-gradient(circle at top, rgba(212,175,55,0.10), transparent 24%),
         radial-gradient(circle at 20% 10%, rgba(139,92,246,0.12), transparent 24%),
         radial-gradient(circle at 80% 18%, rgba(59,130,246,0.08), transparent 20%),
-        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 45%, #0a0f1b 100%);
+        linear-gradient(180deg, var(--底1) 0%, var(--底2) 45%, #0a0f1b 100%);
     }
 
     .wrap {
-      max-width: 430px;
+      max-width: 440px;
       margin: 0 auto;
-      padding: 18px 14px 26px;
+      padding: 14px 12px 24px;
     }
 
     .hero {
       position: relative;
       border-radius: 24px;
-      padding: 18px;
+      padding: 16px;
       border: 1px solid rgba(212,175,55,0.22);
       background:
         linear-gradient(180deg, rgba(17,23,39,0.96), rgba(10,14,24,0.94)),
@@ -55,23 +56,23 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background: linear-gradient(135deg, rgba(245,208,94,0.10), transparent 40%, rgba(139,92,246,0.10));
+      background: linear-gradient(135deg, rgba(245,208,94,0.08), transparent 40%, rgba(139,92,246,0.10));
     }
 
-    .tag {
+    .页签 {
       display: inline-flex;
       align-items: center;
       padding: 5px 10px;
       border-radius: 999px;
       border: 1px solid rgba(245,208,94,0.16);
       background: rgba(212,175,55,0.10);
-      color: var(--gold-2);
+      color: var(--亮金);
       font-size: 12px;
       font-weight: 800;
       letter-spacing: 0.08em;
     }
 
-    .title {
+    .标题 {
       margin: 10px 0 0;
       font-size: 28px;
       font-weight: 900;
@@ -79,17 +80,17 @@
       letter-spacing: 0.03em;
     }
 
-    .sub {
+    .副文 {
       margin: 8px 0 0;
-      color: var(--muted);
+      color: var(--淡);
       font-size: 13px;
       line-height: 1.7;
     }
 
-    .settings-toggle {
+    .设置按钮 {
       position: absolute;
-      top: 16px;
-      right: 16px;
+      top: 14px;
+      right: 14px;
       min-width: 64px;
       height: 38px;
       border: 1px solid rgba(96,165,250,0.18);
@@ -100,39 +101,34 @@
       cursor: pointer;
     }
 
-    .card {
-      margin-top: 14px;
+    .卡 {
+      margin-top: 12px;
       border-radius: 22px;
-      border: 1px solid var(--line);
+      border: 1px solid var(--线);
       background: linear-gradient(180deg, rgba(10,12,22,0.95), rgba(13,18,31,0.92));
       box-shadow: 0 14px 34px rgba(0,0,0,0.34);
-      padding: 16px;
+      padding: 14px;
     }
 
-    .settings {
-      display: none;
-    }
+    .设置区 { display: none; }
+    .设置区.show { display: block; }
 
-    .settings.show {
-      display: block;
-    }
-
-    .section-title {
-      margin: 0 0 14px;
+    .区标题 {
+      margin: 0 0 12px;
       font-size: 16px;
       font-weight: 800;
       color: #fef3c7;
     }
 
-    .label {
+    .标签 {
       display: block;
       margin: 0 0 8px;
       font-size: 13px;
-      color: var(--muted);
+      color: var(--淡);
       font-weight: 700;
     }
 
-    .input {
+    .输入框 {
       width: 100%;
       border: 1px solid rgba(212,175,55,0.16);
       background: rgba(7,10,18,0.96);
@@ -143,18 +139,18 @@
       font-size: 15px;
     }
 
-    .input:focus {
+    .输入框:focus {
       border-color: rgba(245,208,94,0.55);
       box-shadow: 0 0 0 3px rgba(245,208,94,0.08);
     }
 
-    .row-2 {
+    .双列 {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
-    .btn {
+    .按钮 {
       border: 1px solid rgba(212,175,55,0.16);
       border-radius: 14px;
       min-height: 50px;
@@ -164,26 +160,27 @@
       transition: transform .18s ease, filter .18s ease;
     }
 
-    .btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .按钮:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .按钮:active { transform: translateY(0); }
 
-    .btn-gold {
+    .金按钮 {
       background: linear-gradient(180deg, rgba(212,175,55,0.22), rgba(120,53,15,0.14));
       color: #fef3c7;
     }
 
-    .btn-violet {
+    .紫按钮 {
       background: linear-gradient(180deg, rgba(109,40,217,0.26), rgba(67,56,202,0.14));
       color: #ede9fe;
       border-color: rgba(167,139,250,0.18);
     }
 
-    .btn-blue {
+    .蓝按钮 {
       background: linear-gradient(180deg, rgba(37,99,235,0.18), rgba(30,64,175,0.12));
       color: #dbeafe;
       border-color: rgba(96,165,250,0.16);
     }
 
-    .btn-red {
+    .红按钮 {
       background: linear-gradient(180deg, rgba(185,28,28,0.22), rgba(127,29,29,0.12));
       color: #fee2e2;
       border-color: rgba(252,165,165,0.16);
@@ -193,19 +190,19 @@
       font-weight: 800;
     }
 
-    .big-panel {
+    .主分区 {
       text-align: center;
-      padding: 18px 14px 16px;
+      padding: 16px 12px 14px;
     }
 
-    .big-label {
+    .主标签 {
       font-size: 13px;
-      color: var(--muted);
+      color: var(--淡);
     }
 
-    .big-score {
+    .主分数 {
       margin-top: 8px;
-      font-size: 46px;
+      font-size: 50px;
       line-height: 1;
       font-weight: 900;
       color: #fff7d6;
@@ -213,14 +210,14 @@
       text-shadow: 0 0 18px rgba(212,175,55,0.12);
     }
 
-    .mini-grid {
+    .信息格 {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-top: 14px;
     }
 
-    .mini {
+    .信息卡 {
       border: 1px solid rgba(255,255,255,0.05);
       background: rgba(255,255,255,0.03);
       border-radius: 16px;
@@ -228,19 +225,19 @@
       text-align: center;
     }
 
-    .mini span:first-child {
+    .信息标题 {
       display: block;
       font-size: 12px;
-      color: var(--muted);
+      color: var(--淡);
       margin-bottom: 6px;
     }
 
-    .mini strong {
+    .信息值 {
       font-size: 24px;
       font-weight: 900;
     }
 
-    .progress-wrap {
+    .进度槽 {
       margin-top: 14px;
       height: 14px;
       border-radius: 999px;
@@ -249,36 +246,37 @@
       border: 1px solid rgba(212,175,55,0.10);
     }
 
-    .progress-bar {
+    .进度条 {
       height: 100%;
       width: 0%;
       border-radius: 999px;
-      background: linear-gradient(90deg, var(--gold), var(--gold-2), var(--violet));
+      background: linear-gradient(90deg, var(--金), var(--亮金), var(--紫));
       transition: width .24s ease;
     }
 
-    .status {
+    .状态字 {
       margin-top: 10px;
       text-align: center;
       font-size: 13px;
       line-height: 1.7;
-      color: var(--muted);
+      color: var(--淡);
     }
 
-    .action-grid {
+    .操作区 {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       margin-top: 14px;
     }
 
-    .action-btn {
-      min-height: 92px;
+    .操作按钮 {
+      min-height: 96px;
       font-size: 22px;
       letter-spacing: 0.03em;
+      line-height: 1.35;
     }
 
-    .history-title {
+    .历史头 {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -286,12 +284,12 @@
       margin-bottom: 12px;
     }
 
-    .history-count {
+    .历史数量 {
       font-size: 12px;
-      color: var(--muted);
+      color: var(--淡);
     }
 
-    .record-card {
+    .记录卡 {
       display: flex;
       justify-content: space-between;
       gap: 12px;
@@ -303,27 +301,15 @@
       margin-bottom: 10px;
     }
 
-    .record-main {
-      min-width: 0;
-    }
+    .记录主体 { min-width: 0; }
+    .记录时间 { font-size: 12px; color: #64748b; }
+    .记录分数 { margin-top: 5px; font-size: 15px; font-weight: 900; color: #fef3c7; }
 
-    .record-time {
-      font-size: 12px;
-      color: #64748b;
-    }
-
-    .record-score {
-      margin-top: 5px;
-      font-size: 15px;
-      font-weight: 900;
-      color: #fef3c7;
-    }
-
-    .empty {
+    .空状态 {
       border: 1px dashed rgba(255,255,255,0.10);
       border-radius: 16px;
       padding: 14px;
-      color: var(--muted);
+      color: var(--淡);
       font-size: 13px;
       text-align: center;
       background: rgba(255,255,255,0.03);
@@ -333,78 +319,86 @@
 <body>
   <div class="wrap">
     <div class="hero">
-      <button id="openSettingsBtn" class="settings-toggle">设置</button>
-      <div class="tag">神魔之塔风格</div>
-      <h1 class="title">公会分数</h1>
-      <p class="sub">主页面只保留两个记录按钮，其余内容都收进设置里。</p>
+      <button id="openSettingsBtn" class="设置按钮">设置</button>
+      <div class="页签">公会积分</div>
+      <h1 class="标题">公会积分</h1>
+      <p class="副文">主页面只保留记分、次数和进度。</p>
     </div>
 
-    <section id="settingsPanel" class="card settings">
-      <div class="history-title">
-        <h2 class="section-title" style="margin:0;">设置</h2>
-        <button id="closeSettingsBtn" class="btn btn-blue" style="min-height:38px;padding:8px 12px;">关闭</button>
+    <section id="settingsPanel" class="卡 设置区">
+      <div class="历史头">
+        <h2 class="区标题" style="margin:0;">设置</h2>
+        <button id="closeSettingsBtn" class="按钮 蓝按钮" style="min-height:38px;padding:8px 12px;">关闭</button>
       </div>
 
       <div>
-        <label class="label">目标分数</label>
-        <input id="target" class="input" type="number" min="0" value="20000" />
+        <label class="标签">目标分数</label>
+        <input id="target" class="输入框" type="number" min="0" value="20000" />
       </div>
 
       <div style="margin-top:12px;">
-        <label class="label">目前已有分数</label>
-        <input id="initialCurrent" class="input" type="number" min="0" value="0" />
+        <label class="标签">目前已有分数</label>
+        <input id="initialCurrent" class="输入框" type="number" min="0" value="0" />
       </div>
 
-      <div class="row-2" style="margin-top:12px;">
-        <button id="startBtn" class="btn btn-gold">开始</button>
-        <button id="resetAllBtn" class="btn btn-blue">重置</button>
+      <div class="双列" style="margin-top:12px;">
+        <button id="startBtn" class="按钮 金按钮">开始</button>
+        <button id="resetAllBtn" class="按钮 蓝按钮">重置</button>
       </div>
 
-      <div class="status" style="text-align:left;margin-top:12px;">
-        普通固定 40 分，特别固定 200 分，尚需体力按普通 40 分去推算。
-      </div>
-    </section>
-
-    <section class="card big-panel">
-      <div class="big-label">目前总分</div>
-      <div id="currentDisplay" class="big-score">0</div>
-
-      <div class="mini-grid">
-        <div class="mini">
-          <span>距离目标</span>
-          <strong id="remainingDisplay" style="color:#cffafe;">0</strong>
-        </div>
-        <div class="mini">
-          <span>尚需体力</span>
-          <strong id="staminaDisplay" style="color:#ede9fe;">0</strong>
-        </div>
-      </div>
-
-      <div class="progress-wrap">
-        <div id="progressBar" class="progress-bar"></div>
-      </div>
-      <div id="statusText" class="status"></div>
-
-      <div class="action-grid">
-        <button id="addNormalBtn" class="btn btn-gold action-btn">普通<br>+40</button>
-        <button id="addSpecialBtn" class="btn btn-violet action-btn">特别<br>+200</button>
+      <div class="状态字" style="text-align:left;margin-top:12px;">
+        普通固定 40 分，特别固定 200 分。尚需体力按普通 40 分去推算。
       </div>
     </section>
 
-    <section class="card">
-      <div class="history-title">
-        <h2 class="section-title" style="margin:0;">记录</h2>
-        <div id="historyCount" class="history-count">共 0 笔</div>
+    <section class="卡 主分区">
+      <div class="主标签">目前总分</div>
+      <div id="currentDisplay" class="主分数">0</div>
+
+      <div class="信息格">
+        <div class="信息卡">
+          <span class="信息标题">距离目标</span>
+          <strong id="remainingDisplay" class="信息值" style="color:#cffafe;">0</strong>
+        </div>
+        <div class="信息卡">
+          <span class="信息标题">尚需体力</span>
+          <strong id="staminaDisplay" class="信息值" style="color:#ede9fe;">0</strong>
+        </div>
+        <div class="信息卡">
+          <span class="信息标题">已打普通</span>
+          <strong id="normalCountDisplay" class="信息值" style="color:#fef3c7;">0</strong>
+        </div>
+        <div class="信息卡">
+          <span class="信息标题">已打特别</span>
+          <strong id="specialCountDisplay" class="信息值" style="color:#ede9fe;">0</strong>
+        </div>
+      </div>
+
+      <div class="进度槽">
+        <div id="progressBar" class="进度条"></div>
+      </div>
+      <div id="statusText" class="状态字"></div>
+
+      <div class="操作区">
+        <button id="addNormalBtn" class="按钮 金按钮 操作按钮">普通<br>+40</button>
+        <button id="addSpecialBtn" class="按钮 紫按钮 操作按钮">特别<br>+200</button>
+      </div>
+    </section>
+
+    <section class="卡">
+      <div class="历史头">
+        <h2 class="区标题" style="margin:0;">记录历史</h2>
+        <div id="historyCount" class="历史数量">共 0 笔</div>
       </div>
       <div id="historyWrap"></div>
     </section>
   </div>
 
   <script>
-    const STORAGE_KEY = 'tos-guild-score-tracker-v6';
-    const NORMAL_SCORE = 40;
-    const SPECIAL_SCORE = 200;
-    const STAMINA_PER_RUN = 40;
+    const STORAGE_KEY = 'tos-guild-score-tracker-v7';
+    const 普通分 = 40;
+    const 特别分 = 200;
+    const 每场体力 = 40;
 
     const el = {
       target: document.getElementById('target'),
@@ -412,6 +406,8 @@
       currentDisplay: document.getElementById('currentDisplay'),
       remainingDisplay: document.getElementById('remainingDisplay'),
       staminaDisplay: document.getElementById('staminaDisplay'),
+      normalCountDisplay: document.getElementById('normalCountDisplay'),
+      specialCountDisplay: document.getElementById('specialCountDisplay'),
       progressBar: document.getElementById('progressBar'),
       statusText: document.getElementById('statusText'),
       addNormalBtn: document.getElementById('addNormalBtn'),
@@ -425,9 +421,9 @@
       settingsPanel: document.getElementById('settingsPanel')
     };
 
-    let state = loadState();
+    let state = 读取状态();
 
-    function defaultState() {
+    function 默认状态() {
       return {
         target: 20000,
         initialCurrent: 0,
@@ -437,135 +433,148 @@
       };
     }
 
-    function loadState() {
+    function 读取状态() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) return defaultState();
-        return { ...defaultState(), ...JSON.parse(saved) };
+        if (!saved) return 默认状态();
+        return { ...默认状态(), ...JSON.parse(saved) };
       } catch {
-        return defaultState();
+        return 默认状态();
       }
     }
 
-    function saveState() {
+    function 保存状态() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
-    function pad(n) {
+    function 补零(n) {
       return String(n).padStart(2, '0');
     }
 
-    function nowText() {
+    function 现在时间() {
       const d = new Date();
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      return `${d.getFullYear()}-${补零(d.getMonth() + 1)}-${补零(d.getDate())} ${补零(d.getHours())}:${补零(d.getMinutes())}:${补零(d.getSeconds())}`;
     }
 
-    function getExtraScore() {
+    function 额外分数() {
       return state.history.reduce((sum, item) => sum + Number(item.score || 0), 0);
     }
 
-    function getCurrentTotal() {
-      return Number(state.initialCurrent || 0) + getExtraScore();
+    function 目前总分() {
+      return Number(state.initialCurrent || 0) + 额外分数();
     }
 
-    function openSettings() {
+    function 普通次数() {
+      return state.history.filter(item => item.type === 'normal').length;
+    }
+
+    function 特别次数() {
+      return state.history.filter(item => item.type === 'special').length;
+    }
+
+    function 打开设置() {
       state.settingsOpen = true;
-      saveState();
-      renderSettings();
+      保存状态();
+      渲染设置();
     }
 
-    function closeSettings() {
+    function 关闭设置() {
       state.settingsOpen = false;
-      saveState();
-      renderSettings();
+      保存状态();
+      渲染设置();
     }
 
-    function renderSettings() {
+    function 渲染设置() {
       if (state.settingsOpen) el.settingsPanel.classList.add('show');
       else el.settingsPanel.classList.remove('show');
     }
 
-    function startTracking() {
+    function 开始记录() {
       state.target = Math.max(0, Number(el.target.value) || 0);
       state.initialCurrent = Math.max(0, Number(el.initialCurrent.value) || 0);
       state.started = true;
-      saveState();
-      closeSettings();
-      render();
+      保存状态();
+      关闭设置();
+      渲染();
       alert('已开始记录');
     }
 
-    function addScore(type) {
+    function 加分(type) {
       if (!state.started) {
-        openSettings();
+        打开设置();
         alert('请先到设置里输入目前分数，再按开始');
         return;
       }
 
-      const score = type === 'normal' ? NORMAL_SCORE : SPECIAL_SCORE;
+      const score = type === 'normal' ? 普通分 : 特别分;
       const typeLabel = type === 'normal' ? '普通任务' : '特别任务';
 
       state.history.unshift({
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        time: nowText(),
+        time: 现在时间(),
+        type,
         typeLabel,
         score
       });
 
-      saveState();
-      render();
+      保存状态();
+      渲染();
     }
 
-    function deleteLog(id) {
+    function 删除记录(id) {
       state.history = state.history.filter(item => item.id !== id);
-      saveState();
-      render();
+      保存状态();
+      渲染();
     }
 
-    function resetAll() {
+    function 重置全部() {
       if (!confirm('确定要重置全部资料吗？')) return;
-      state = defaultState();
-      saveState();
-      fillInputs();
-      renderSettings();
-      render();
+      state = 默认状态();
+      保存状态();
+      填入设置值();
+      渲染设置();
+      渲染();
     }
 
-    function fillInputs() {
+    function 填入设置值() {
       el.target.value = state.target;
       el.initialCurrent.value = state.initialCurrent;
     }
 
-    function renderHistory() {
+    function 渲染记录() {
       el.historyCount.textContent = `共 ${state.history.length} 笔`;
 
       if (!state.history.length) {
-        el.historyWrap.innerHTML = `<div class="empty">目前还没有记录</div>`;
+        el.historyWrap.innerHTML = `<div class="空状态">目前还没有记录</div>`;
         return;
       }
 
       el.historyWrap.innerHTML = state.history.map((item, index) => `
-        <div class="record-card">
-          <div class="record-main">
-            <div class="record-time">#${state.history.length - index} ・ ${item.time}</div>
-            <div class="record-score">+${item.score} 分 ・ ${item.typeLabel}</div>
+        <div class="记录卡">
+          <div class="记录主体">
+            <div class="记录时间">#${state.history.length - index} ・ ${item.time}</div>
+            <div class="记录分数">+${item.score} 分 ・ ${item.typeLabel}</div>
           </div>
-          <button class="btn btn-red" onclick="deleteLog('${item.id}')">删除</button>
+          <button class="按钮 红按钮" onclick="删除记录('${item.id}')">删除</button>
         </div>
       `).join('');
     }
 
-    function render() {
-      const current = getCurrentTotal();
+    function 渲染() {
+      const current = 目前总分();
       const target = Math.max(0, Number(state.target) || 0);
       const remaining = Math.max(0, target - current);
       const progress = target === 0 ? 100 : Math.min(100, (current / target) * 100);
-      const normalRuns = remaining === 0 ? 0 : Math.ceil(remaining / NORMAL_SCORE);
-      const stamina = normalRuns * STAMINA_PER_RUN;
+      const needNormalRuns = remaining === 0 ? 0 : Math.ceil(remaining / 普通分);
+      const stamina = needNormalRuns * 每场体力;
+      const normalCount = 普通次数();
+      const specialCount = 特别次数();
 
       el.currentDisplay.textContent = current.toLocaleString();
       el.remainingDisplay.textContent = remaining.toLocaleString();
       el.staminaDisplay.textContent = stamina.toLocaleString();
+      el.normalCountDisplay.textContent = normalCount.toLocaleString();
+      el.specialCountDisplay.textContent = specialCount.toLocaleString();
       el.progressBar.style.width = `${progress}%`;
 
       if (!state.started) {
@@ -573,36 +582,36 @@
       } else if (current >= target) {
         el.statusText.textContent = `已达标，目前 ${current.toLocaleString()} 分`;
       } else {
-        el.statusText.textContent = `还差 ${remaining.toLocaleString()} 分，按普通 40 分推算，还要 ${normalRuns.toLocaleString()} 次，约 ${stamina.toLocaleString()} 体力`;
+        el.statusText.textContent = `还差 ${remaining.toLocaleString()} 分，还要 ${needNormalRuns.toLocaleString()} 次普通，约 ${stamina.toLocaleString()} 体力`;
       }
 
-      renderHistory();
+      渲染记录();
     }
 
-    window.deleteLog = deleteLog;
+    window.删除记录 = 删除记录;
 
-    el.startBtn.addEventListener('click', startTracking);
-    el.addNormalBtn.addEventListener('click', () => addScore('normal'));
-    el.addSpecialBtn.addEventListener('click', () => addScore('special'));
-    el.resetAllBtn.addEventListener('click', resetAll);
-    el.openSettingsBtn.addEventListener('click', openSettings);
-    el.closeSettingsBtn.addEventListener('click', closeSettings);
+    el.startBtn.addEventListener('click', 开始记录);
+    el.addNormalBtn.addEventListener('click', () => 加分('normal'));
+    el.addSpecialBtn.addEventListener('click', () => 加分('special'));
+    el.resetAllBtn.addEventListener('click', 重置全部);
+    el.openSettingsBtn.addEventListener('click', 打开设置);
+    el.closeSettingsBtn.addEventListener('click', 关闭设置);
 
     el.target.addEventListener('input', () => {
       state.target = Math.max(0, Number(el.target.value) || 0);
-      saveState();
-      render();
+      保存状态();
+      渲染();
     });
 
     el.initialCurrent.addEventListener('input', () => {
       state.initialCurrent = Math.max(0, Number(el.initialCurrent.value) || 0);
-      saveState();
-      render();
+      保存状态();
+      渲染();
     });
 
-    fillInputs();
-    renderSettings();
-    render();
+    填入设置值();
+    渲染设置();
+    渲染();
   </script>
 </body>
 </html>
