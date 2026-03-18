@@ -3,673 +3,381 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>公会分数</title>
+  <title>积宏工作台</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root {
-      --金: #d4af37;
-      --亮金: #f5d05e;
-      --紫: #8b5cf6;
-      --蓝: #60a5fa;
-      --底1: #07080d;
-      --底2: #0c1220;
-      --板: rgba(12, 16, 28, 0.92);
-      --线: rgba(212, 175, 55, 0.18);
-      --字: #f8fafc;
-      --淡: #94a3b8;
-    }
+    body { background-color: #020617; color: #cbd5e1; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    .nav-btn { position: relative; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500; color: #94a3b8; transition: color 0.2s; }
+    .nav-btn:hover { color: #f1f5f9; }
+    .nav-btn.active { color: #3b82f6; }
+    .nav-btn.active::after { content: ''; position: absolute; bottom: -16px; left: 0; right: 0; height: 2px; background-color: #3b82f6; border-radius: 2px 2px 0 0; }
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      color: var(--字);
-      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-      background:
-        radial-gradient(circle at top, rgba(212,175,55,0.10), transparent 24%),
-        radial-gradient(circle at 20% 10%, rgba(139,92,246,0.12), transparent 24%),
-        radial-gradient(circle at 80% 18%, rgba(59,130,246,0.08), transparent 20%),
-        linear-gradient(180deg, var(--底1) 0%, var(--底2) 45%, #0a0f1b 100%);
-    }
+    .page { display: none; animation: fadeIn 0.3s ease forwards; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-    .wrap {
-      max-width: 440px;
-      margin: 0 auto;
-      padding: 14px 12px 24px;
-    }
+    .manage-actions { opacity: 0; transform: translateX(10px); pointer-events: none; transition: all 0.2s ease; display: flex; }
+    body.manage-mode .manage-actions { opacity: 1; transform: translateX(0); pointer-events: auto; }
+    body.manage-mode .tool-primary-action { opacity: 0.3; pointer-events: none; }
 
-    .hero {
-      position: relative;
-      border-radius: 24px;
-      padding: 16px;
-      border: 1px solid rgba(212,175,55,0.22);
-      background:
-        linear-gradient(180deg, rgba(17,23,39,0.96), rgba(10,14,24,0.94)),
-        linear-gradient(135deg, rgba(212,175,55,0.06), rgba(139,92,246,0.06));
-      box-shadow: 0 20px 44px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.03);
-      overflow: hidden;
-    }
+    .modal-mask { opacity: 0; visibility: hidden; pointer-events: none; transition: all 0.25s ease; backdrop-filter: blur(4px); }
+    .modal-mask.show { opacity: 1; visibility: visible; pointer-events: auto; }
+    .modal-content { transform: translateY(15px) scale(0.98); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .modal-mask.show .modal-content { transform: translateY(0) scale(1); }
 
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(135deg, rgba(245,208,94,0.08), transparent 40%, rgba(139,92,246,0.10));
-    }
-
-    .页签 {
-      display: inline-flex;
-      align-items: center;
-      padding: 5px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(245,208,94,0.16);
-      background: rgba(212,175,55,0.10);
-      color: var(--亮金);
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-    }
-
-    .标题 {
-      margin: 10px 0 0;
-      font-size: 28px;
-      font-weight: 900;
-      color: #fef3c7;
-      letter-spacing: 0.03em;
-    }
-
-    .副文 {
-      margin: 8px 0 0;
-      color: var(--淡);
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
-    .设置按钮 {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      min-width: 64px;
-      height: 38px;
-      border: 1px solid rgba(96,165,250,0.18);
-      background: linear-gradient(180deg, rgba(37,99,235,0.18), rgba(30,64,175,0.12));
-      color: #dbeafe;
-      border-radius: 12px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .卡 {
-      margin-top: 12px;
-      border-radius: 22px;
-      border: 1px solid var(--线);
-      background: linear-gradient(180deg, rgba(10,12,22,0.95), rgba(13,18,31,0.92));
-      box-shadow: 0 14px 34px rgba(0,0,0,0.34);
-      padding: 14px;
-    }
-
-    .设置区 { display: none; }
-    .设置区.show { display: block; }
-
-    .区标题 {
-      margin: 0 0 12px;
-      font-size: 16px;
-      font-weight: 800;
-      color: #fef3c7;
-    }
-
-    .标签 {
-      display: block;
-      margin: 0 0 8px;
-      font-size: 13px;
-      color: var(--淡);
-      font-weight: 700;
-    }
-
-    .输入框 {
-      width: 100%;
-      border: 1px solid rgba(212,175,55,0.16);
-      background: rgba(7,10,18,0.96);
-      color: #fff;
-      border-radius: 14px;
-      padding: 12px 14px;
-      outline: none;
-      font-size: 15px;
-    }
-
-    .输入框:focus {
-      border-color: rgba(245,208,94,0.55);
-      box-shadow: 0 0 0 3px rgba(245,208,94,0.08);
-    }
-
-    .双列 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .按钮 {
-      border: 1px solid rgba(212,175,55,0.16);
-      border-radius: 14px;
-      min-height: 50px;
-      padding: 12px 14px;
-      font-weight: 900;
-      cursor: pointer;
-      transition: transform .18s ease, filter .18s ease;
-    }
-
-    .按钮:hover { transform: translateY(-1px); filter: brightness(1.05); }
-    .按钮:active { transform: translateY(0); }
-
-    .金按钮 {
-      background: linear-gradient(180deg, rgba(212,175,55,0.22), rgba(120,53,15,0.14));
-      color: #fef3c7;
-    }
-
-    .紫按钮 {
-      background: linear-gradient(180deg, rgba(109,40,217,0.26), rgba(67,56,202,0.14));
-      color: #ede9fe;
-      border-color: rgba(167,139,250,0.18);
-    }
-
-    .蓝按钮 {
-      background: linear-gradient(180deg, rgba(37,99,235,0.18), rgba(30,64,175,0.12));
-      color: #dbeafe;
-      border-color: rgba(96,165,250,0.16);
-    }
-
-    .红按钮 {
-      background: linear-gradient(180deg, rgba(185,28,28,0.22), rgba(127,29,29,0.12));
-      color: #fee2e2;
-      border-color: rgba(252,165,165,0.16);
-      min-height: 38px;
-      padding: 8px 12px;
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    .主分区 {
-      text-align: center;
-      padding: 16px 12px 14px;
-    }
-
-    .主标签 {
-      font-size: 13px;
-      color: var(--淡);
-    }
-
-    .主分数 {
-      margin-top: 8px;
-      font-size: 50px;
-      line-height: 1;
-      font-weight: 900;
-      color: #fff7d6;
-      letter-spacing: 0.02em;
-      text-shadow: 0 0 18px rgba(212,175,55,0.12);
-    }
-
-    .信息格 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .信息卡 {
-      border: 1px solid rgba(255,255,255,0.05);
-      background: rgba(255,255,255,0.03);
-      border-radius: 16px;
-      padding: 12px;
-      text-align: center;
-    }
-
-    .信息标题 {
-      display: block;
-      font-size: 12px;
-      color: var(--淡);
-      margin-bottom: 6px;
-    }
-
-    .信息值 {
-      font-size: 24px;
-      font-weight: 900;
-    }
-
-    .进度槽 {
-      margin-top: 14px;
-      height: 14px;
-      border-radius: 999px;
-      overflow: hidden;
-      background: rgba(15,23,42,0.98);
-      border: 1px solid rgba(212,175,55,0.10);
-    }
-
-    .进度条 {
-      height: 100%;
-      width: 0%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--金), var(--亮金), var(--紫));
-      transition: width .24s ease;
-    }
-
-    .状态字 {
-      margin-top: 10px;
-      text-align: center;
-      font-size: 13px;
-      line-height: 1.7;
-      color: var(--淡);
-    }
-
-    .操作区 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .操作按钮 {
-      min-height: 96px;
-      font-size: 22px;
-      letter-spacing: 0.03em;
-      line-height: 1.35;
-    }
-
-    .历史头 {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .历史数量 {
-      font-size: 12px;
-      color: var(--淡);
-    }
-
-        .记录卡 {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      border: 1px solid rgba(212,175,55,0.10);
-      background: rgba(255,255,255,0.03);
-      border-radius: 16px;
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-
-    .记录主体 { min-width: 0; }
-    .记录时间 { font-size: 12px; color: #64748b; }
-    .记录分数 { margin-top: 5px; font-size: 15px; font-weight: 900; color: #fef3c7; }
-
-    .记录列表 {
-      max-height: 320px;
-      overflow-y: auto;
-      padding-right: 4px;
-      scroll-behavior: smooth;
-    }
-
-    .记录列表::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .记录列表::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.03);
-      border-radius: 999px;
-    }
-
-    .记录列表::-webkit-scrollbar-thumb {
-      background: rgba(212,175,55,0.28);
-      border-radius: 999px;
-    }
-
-    .回顶按钮 {
-      position: fixed;
-      right: 16px;
-      bottom: 20px;
-      width: 48px;
-      height: 48px;
-      border-radius: 999px;
-      border: 1px solid rgba(212,175,55,0.18);
-      background: linear-gradient(180deg, rgba(212,175,55,0.22), rgba(120,53,15,0.14));
-      color: #fef3c7;
-      font-size: 20px;
-      font-weight: 900;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.28);
-      display: none;
-      z-index: 20;
-    }
-
-    .回顶按钮.show {
-      display: block;
-    }
-
-    .空状态 {
-      border: 1px dashed rgba(255,255,255,0.10);
-      border-radius: 16px;
-      padding: 14px;
-      color: var(--淡);
-      font-size: 13px;
-      text-align: center;
-      background: rgba(255,255,255,0.03);
-    }
+    /* 全局 Toast 提示动画 */
+    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(51, 65, 85, 0.8); color: #f8fafc; padding: 10px 20px; border-radius: 8px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: translateY(-20px); opacity: 0; animation: toastIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; display: flex; items-center gap: 8px; }
+    @keyframes toastIn { to { transform: translateY(0); opacity: 1; } }
+    .toast.fade-out { animation: toastOut 0.3s ease forwards; }
+    @keyframes toastOut { to { transform: translateY(-10px); opacity: 0; } }
   </style>
 </head>
-<body>
-  <div class="wrap">
-    <div class="hero">
-      <button id="openSettingsBtn" class="设置按钮">设置</button>
-      <div class="页签">公会积分</div>
-      <h1 class="标题">公会积分</h1>
-      <p class="副文">同一关卡，奖励随机。打完后按对应奖励记录即可。</p>
+<body class="antialiased selection:bg-blue-500/30">
+
+  <div id="toast-container"></div>
+
+  <nav class="sticky top-0 z-40 w-full bg-[#020617]/80 backdrop-blur-md border-b border-slate-800/80">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-8">
+        <span class="font-bold text-slate-100 text-lg tracking-wide flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+          JiHong Hub
+        </span>
+        <div class="hidden md:flex gap-2">
+          <button class="nav-btn active" data-page="home">总览</button>
+          <button class="nav-btn" data-page="games">游戏区</button>
+          <button class="nav-btn" data-page="exchange">交易台</button>
+          <button class="nav-btn" data-page="calc">组件库</button>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="toggleManage" class="text-sm px-3 py-1.5 rounded-lg bg-slate-800/50 hover:bg-slate-800 text-slate-300 border border-slate-700/50 transition-colors flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span id="manageText">管理模式</span>
+        </button>
+        <button id="openAddTool" class="text-sm px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors shadow-lg shadow-blue-500/20">
+          + 新增
+        </button>
+      </div>
     </div>
+  </nav>
 
-    <section id="settingsPanel" class="卡 设置区">
-      <div class="历史头">
-        <h2 class="区标题" style="margin:0;">设置</h2>
-        <button id="closeSettingsBtn" class="按钮 蓝按钮" style="min-height:38px;padding:8px 12px;">关闭</button>
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    <section class="page active" id="page-home">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-slate-900/50 border border-slate-800/60 rounded-xl p-5">
+          <div class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-2">活跃工具</div>
+          <div class="text-3xl font-bold text-slate-100" id="statTools">0</div>
+        </div>
+        <div class="bg-slate-900/50 border border-slate-800/60 rounded-xl p-5">
+          <div class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-2">已部署链接</div>
+          <div class="text-3xl font-bold text-blue-400" id="statLinked">0</div>
+        </div>
+        <div class="bg-slate-900/50 border border-slate-800/60 rounded-xl p-5">
+          <div class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-2">工作区</div>
+          <div class="text-3xl font-bold text-slate-100">3</div>
+        </div>
+        <div class="bg-slate-900/50 border border-slate-800/60 rounded-xl p-5">
+          <div class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-2">最近交互</div>
+          <div class="text-3xl font-bold text-slate-100" id="statRecent">0</div>
+        </div>
       </div>
 
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="space-y-8">
+          <div>
+            <h2 class="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">星标置顶</h2>
+            <div class="space-y-3" id="pinnedList"></div>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">最近使用</h2>
+            <div class="space-y-3" id="recentList"></div>
+          </div>
+        </div>
+        <div>
+           <h2 class="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">工作区结构</h2>
+            <div class="space-y-4">
+               <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors cursor-pointer" onclick="showPage('games')">
+                  <div class="flex items-center justify-between mb-3"><h3 class="font-bold text-slate-100">游戏区</h3><span class="text-xs text-slate-500">点击进入 →</span></div>
+                  <div class="text-sm text-slate-400" id="homeGamesPreview"></div>
+               </div>
+               <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors cursor-pointer" onclick="showPage('exchange')">
+                  <div class="flex items-center justify-between mb-3"><h3 class="font-bold text-slate-100">交易终端</h3><span class="text-xs text-slate-500">点击进入 →</span></div>
+                  <div class="text-sm text-slate-400" id="homeExchangePreview"></div>
+               </div>
+               <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors cursor-pointer" onclick="showPage('calc')">
+                  <div class="flex items-center justify-between mb-3"><h3 class="font-bold text-slate-100">计算组件</h3><span class="text-xs text-slate-500">点击进入 →</span></div>
+                  <div class="text-sm text-slate-400" id="homeCalcPreview"></div>
+               </div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <template id="page-template">
       <div>
-        <label class="标签">目标分数</label>
-        <input id="target" class="输入框" type="number" min="0" value="20000" />
-      </div>
-
-      <div style="margin-top:12px;">
-        <label class="标签">目前已有分数</label>
-        <input id="initialCurrent" class="输入框" type="number" min="0" value="0" />
-      </div>
-
-      <div class="双列" style="margin-top:12px;">
-        <button id="startBtn" class="按钮 金按钮">开始</button>
-        <button id="resetAllBtn" class="按钮 蓝按钮">重置</button>
-      </div>
-
-      <div class="状态字" style="text-align:left;margin-top:12px;">
-        关卡只有一种。每次通关后，按本次拿到的奖励记录：普通奖励 40 分，特别奖励 200 分。尚需体力按普通奖励 40 分去推算。
-      </div>
-    </section>
-
-    <section class="卡 主分区">
-      <div class="主标签">目前总分</div>
-      <div id="currentDisplay" class="主分数">0</div>
-
-      <div class="信息格">
-        <div class="信息卡">
-          <span class="信息标题">距离目标</span>
-          <strong id="remainingDisplay" class="信息值" style="color:#cffafe;">0</strong>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <h1 class="text-2xl font-bold text-slate-100 flex items-center gap-3"><span class="page-title">标题</span></h1>
+          <div class="flex items-center gap-3 w-full md:w-auto relative">
+            <svg class="absolute left-3 top-2.5 text-slate-500 z-10" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="search-input w-full md:w-64 bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg pl-9 pr-12 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none" placeholder="检索工具..." />
+            <div class="absolute right-2 top-2 text-[10px] font-mono text-slate-500 border border-slate-700 rounded px-1.5 py-0.5 bg-slate-800 pointer-events-none">⌘K</div>
+          </div>
         </div>
-        <div class="信息卡">
-          <span class="信息标题">尚需体力</span>
-          <strong id="staminaDisplay" class="信息值" style="color:#ede9fe;">0</strong>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 list-container"></div>
+      </div>
+    </template>
+
+    <section class="page" id="page-games"></section>
+    <section class="page" id="page-exchange"></section>
+    <section class="page" id="page-calc"></section>
+  </main>
+
+  <div class="modal-mask fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80" id="toolModalMask">
+    <div class="modal-content w-full max-w-lg bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+        <h2 class="text-lg font-bold text-slate-100" id="modalTitle">配置节点</h2>
+        <button id="closeModal" class="text-slate-400 hover:text-white"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">归属分区</label>
+            <select id="toolCategory" class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2.5 outline-none focus:border-blue-500">
+              <option value="games">游戏区</option><option value="exchange">交易终端</option><option value="calc">计算组件</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">运行状态</label>
+            <select id="toolStatus" class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2.5 outline-none focus:border-blue-500">
+              <option value="已启用">已启用</option><option value="建设中">建设中</option><option value="预留">预留</option>
+            </select>
+          </div>
         </div>
-        <div class="信息卡">
-          <span class="信息标题">普通奖励次数</span>
-          <strong id="normalCountDisplay" class="信息值" style="color:#fef3c7;">0</strong>
-        </div>
-        <div class="信息卡">
-          <span class="信息标题">特别奖励次数</span>
-          <strong id="specialCountDisplay" class="信息值" style="color:#ede9fe;">0</strong>
-        </div>
+        <div><label class="block text-xs font-semibold text-slate-500 mb-1.5">节点名称</label><input id="toolName" type="text" class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2.5 outline-none focus:border-blue-500" /></div>
+        <div><label class="block text-xs font-semibold text-slate-500 mb-1.5">按钮文本</label><input id="toolButtonText" type="text" class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2.5 outline-none focus:border-blue-500" /></div>
+        <div><label class="block text-xs font-semibold text-slate-500 mb-1.5">简介</label><input id="toolDesc" type="text" class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2.5 outline-none focus:border-blue-500" /></div>
+        <div><label class="block text-xs font-semibold text-slate-500 mb-1.5">URL</label><input id="toolLink" type="text" class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2.5 outline-none font-mono focus:border-blue-500" placeholder="https://" /></div>
       </div>
-
-      <div class="进度槽">
-        <div id="progressBar" class="进度条"></div>
+      <div class="px-6 py-4 bg-slate-950/50 border-t border-slate-800 flex justify-end gap-3">
+        <button id="clearDraft" class="text-sm px-4 py-2 text-slate-400">重置</button>
+        <button id="saveTool" class="text-sm px-5 py-2 rounded-lg bg-blue-600 text-white font-medium">确认保存</button>
       </div>
-      <div id="statusText" class="状态字"></div>
-
-      <div class="操作区">
-        <button id="addNormalBtn" class="按钮 金按钮 操作按钮">普通奖励<br>+40</button>
-        <button id="addSpecialBtn" class="按钮 紫按钮 操作按钮">特别奖励<br>+200</button>
-      </div>
-    </section>
-
-    <section class="卡">
-      <div class="历史头">
-        <h2 class="区标题" style="margin:0;">记录历史</h2>
-        <div id="historyCount" class="历史数量">共 0 笔</div>
-      </div>
-      <div id="historyWrap" class="记录列表"></div>
-    </section>
-
-    <button id="backToTopBtn" class="回顶按钮" title="回到最上方">↑</button>
+    </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'tos-guild-score-tracker-v7';
-    const 普通分 = 40;
-    const 特别分 = 200;
-    const 每场体力 = 40;
-
-    const el = {
-      target: document.getElementById('target'),
-      initialCurrent: document.getElementById('initialCurrent'),
-      currentDisplay: document.getElementById('currentDisplay'),
-      remainingDisplay: document.getElementById('remainingDisplay'),
-      staminaDisplay: document.getElementById('staminaDisplay'),
-      normalCountDisplay: document.getElementById('normalCountDisplay'),
-      specialCountDisplay: document.getElementById('specialCountDisplay'),
-      progressBar: document.getElementById('progressBar'),
-      statusText: document.getElementById('statusText'),
-      addNormalBtn: document.getElementById('addNormalBtn'),
-      addSpecialBtn: document.getElementById('addSpecialBtn'),
-      startBtn: document.getElementById('startBtn'),
-      resetAllBtn: document.getElementById('resetAllBtn'),
-      historyCount: document.getElementById('historyCount'),
-      historyWrap: document.getElementById('historyWrap'),
-      openSettingsBtn: document.getElementById('openSettingsBtn'),
-      closeSettingsBtn: document.getElementById('closeSettingsBtn'),
-      settingsPanel: document.getElementById('settingsPanel'),
-      backToTopBtn: document.getElementById('backToTopBtn')
+    const SVGS = {
+      games: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><path d="M15 13h.01"/><path d="M18 11h.01"/></svg>',
+      exchange: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-5 5"/></svg>',
+      calc: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/></svg>',
+      pin: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>',
+      edit: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>',
+      trash: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+      check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>'
     };
 
-    let state = 读取状态();
+    const CONFIG = {
+      pages: [
+        { id: 'games', title: '游戏区', iconColor: 'text-emerald-400' },
+        { id: 'exchange', title: '交易终端', iconColor: 'text-blue-400' },
+        { id: 'calc', title: '计算组件', iconColor: 'text-amber-400' }
+      ]
+    };
 
-    function 默认状态() {
-      return {
-        target: 20000,
-        initialCurrent: 0,
-        started: false,
-        settingsOpen: false,
-        history: []
-      };
+    // 全局 Toast 系统
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `${SVGS.check} <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
     }
 
-    function 读取状态() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) return 默认状态();
-        return { ...默认状态(), ...JSON.parse(saved) };
-      } catch {
-        return 默认状态();
+    const template = document.getElementById('page-template').innerHTML;
+    CONFIG.pages.forEach(p => {
+      const el = document.getElementById(`page-${p.id}`);
+      el.innerHTML = template;
+      el.querySelector('.page-title').textContent = p.title;
+      const input = el.querySelector('.search-input');
+      
+      // 搜索实时过滤
+      input.addEventListener('input', () => {
+        const keyword = input.value.trim().toLowerCase();
+        el.querySelectorAll('.card-item').forEach(item => {
+          item.style.display = (item.dataset.name || '').toLowerCase().includes(keyword) ? 'flex' : 'none';
+        });
+      });
+      
+      // 回车直接打开第一个匹配项 (Iteration 3 极客效率)
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const firstVisible = Array.from(el.querySelectorAll('.card-item')).find(item => item.style.display !== 'none');
+          if (firstVisible) {
+            const link = firstVisible.querySelector('a.tool-primary-action');
+            if (link) link.click();
+          }
+        }
+      });
+    });
+
+    let tools = JSON.parse(localStorage.getItem('jihong-tools-v4')) || [
+      { id: 't1', category: 'games', name: '神魔之塔公会积分', desc: '记录积分与剩余体力', status: '已启用', link: '#', buttonText: '启动工具' }
+    ];
+    let recent = JSON.parse(localStorage.getItem('jihong-recent-v4')) || [];
+    let pinned = JSON.parse(localStorage.getItem('jihong-pin-v4')) || [];
+    let editingId = null;
+    let isManageMode = false;
+
+    const save = () => {
+      localStorage.setItem('jihong-tools-v4', JSON.stringify(tools));
+      localStorage.setItem('jihong-recent-v4', JSON.stringify(recent));
+      localStorage.setItem('jihong-pin-v4', JSON.stringify(pinned));
+    };
+
+    // 路由控制与快捷键 (Cmd/Ctrl + K 聚焦搜索框)
+    let currentPage = 'home';
+    window.showPage = (name) => {
+      currentPage = name;
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(`page-${name}`).classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.page === name));
+      window.scrollTo(0, 0);
+    };
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.page)));
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        if (currentPage === 'home') showPage('games'); // 若在首页，默认跳入第一个带有搜索框的子页
+        setTimeout(() => document.querySelector(`#page-${currentPage === 'home' ? 'games' : currentPage} .search-input`).focus(), 50);
       }
-    }
+    });
 
-    function 保存状态() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
+    document.getElementById('toggleManage').addEventListener('click', (e) => {
+      isManageMode = !isManageMode;
+      document.body.classList.toggle('manage-mode', isManageMode);
+      e.currentTarget.classList.toggle('text-blue-400', isManageMode);
+      document.getElementById('manageText').textContent = isManageMode ? '完成管理' : '管理模式';
+      if (isManageMode) showToast("已开启管理模式");
+    });
 
-    function 补零(n) {
-      return String(n).padStart(2, '0');
-    }
+    window.pushRecent = (id) => {
+      if(isManageMode) return;
+      recent = [id, ...recent.filter(i => i !== id)].slice(0, 5);
+      save(); render();
+    };
+    
+    window.togglePin = (id) => {
+      const isPinning = !pinned.includes(id);
+      pinned = isPinning ? [id, ...pinned] : pinned.filter(i => i !== id);
+      save(); render();
+      showToast(isPinning ? "已加入星标置顶" : "已取消置顶");
+    };
+    
+    window.delTool = (id) => {
+      if(!confirm('确定移除此节点吗？')) return;
+      tools = tools.filter(t => t.id !== id);
+      recent = recent.filter(i => i !== id);
+      pinned = pinned.filter(i => i !== id);
+      save(); render();
+      showToast("节点已移除");
+    };
 
-    function 现在时间() {
-      const d = new Date();
-      return `${d.getFullYear()}-${补零(d.getMonth() + 1)}-${补零(d.getDate())} ${补零(d.getHours())}:${补零(d.getMinutes())}:${补零(d.getSeconds())}`;
-    }
-
-    function 额外分数() {
-      return state.history.reduce((sum, item) => sum + Number(item.score || 0), 0);
-    }
-
-    function 目前总分() {
-      return Number(state.initialCurrent || 0) + 额外分数();
-    }
-
-    function 普通次数() {
-      return state.history.filter(item => item.type === 'normal').length;
-    }
-
-    function 特别次数() {
-      return state.history.filter(item => item.type === 'special').length;
-    }
-
-    function 打开设置() {
-      state.settingsOpen = true;
-      保存状态();
-      渲染设置();
-    }
-
-    function 关闭设置() {
-      state.settingsOpen = false;
-      保存状态();
-      渲染设置();
-    }
-
-    function 渲染设置() {
-      if (state.settingsOpen) el.settingsPanel.classList.add('show');
-      else el.settingsPanel.classList.remove('show');
-    }
-
-    function 开始记录() {
-      state.target = Math.max(0, Number(el.target.value) || 0);
-      state.initialCurrent = Math.max(0, Number(el.initialCurrent.value) || 0);
-      state.started = true;
-      保存状态();
-      关闭设置();
-      渲染();
-      alert('已开始记录');
-    }
-
-    function 加分(type) {
-      if (!state.started) {
-        打开设置();
-        alert('请先到设置里输入目前分数，再按开始');
-        return;
+    // --- 核心修复区： target="_blank" ---
+    const renderCard = (tool, compact = false) => {
+      const isPin = pinned.includes(tool.id);
+      const hasLink = !!tool.link;
+      
+      // 这里的 target="_blank" rel="noopener noreferrer" 解决了跳出回不来的问题
+      if (compact) {
+        return `<div class="flex items-center justify-between p-3 rounded-lg bg-slate-800/30 border border-slate-700/50 hover:bg-slate-800/60">
+            <div class="flex items-center gap-3 truncate pr-4"><div class="text-slate-400">${SVGS[tool.category]}</div><div><div class="text-sm font-semibold text-slate-200">${tool.name}</div></div></div>
+            ${hasLink ? `<a href="${tool.link}" target="_blank" rel="noopener noreferrer" onclick="pushRecent('${tool.id}')" class="text-xs px-3 py-1.5 rounded bg-blue-500/10 text-blue-400">打开</a>` : `<span class="text-xs text-slate-500">空</span>`}
+          </div>`;
       }
 
-      const score = type === 'normal' ? 普通分 : 特别分;
-      const typeLabel = type === 'normal' ? '普通奖励' : '特别奖励';
+      return `<div class="card-item relative bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col h-full" data-name="${tool.name}">
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex items-center gap-3"><div class="p-2 bg-slate-800 rounded-lg ${CONFIG.pages.find(p=>p.id===tool.category).iconColor}">${SVGS[tool.category]}</div><h3 class="text-slate-100 font-semibold text-sm">${tool.name}</h3></div>
+            <div class="manage-actions bg-slate-800/90 rounded-lg p-1 absolute top-4 right-4 z-10">
+              <button onclick="togglePin('${tool.id}')" class="p-1.5 rounded hover:bg-slate-700 ${isPin?'text-amber-400':'text-slate-400'}">${SVGS.pin}</button>
+              <button onclick="openModal('${tool.id}')" class="p-1.5 rounded hover:bg-slate-700 text-slate-400">${SVGS.edit}</button>
+              <button onclick="delTool('${tool.id}')" class="p-1.5 rounded text-slate-400 hover:text-red-400">${SVGS.trash}</button>
+            </div>
+          </div>
+          <p class="text-sm text-slate-400 mb-5 flex-grow">${tool.desc}</p>
+          <div class="mt-auto border-t border-slate-800 pt-4 flex justify-between items-center">
+            ${hasLink 
+              ? `<a href="${tool.link}" target="_blank" rel="noopener noreferrer" onclick="pushRecent('${tool.id}')" class="tool-primary-action text-sm font-medium text-blue-400 flex items-center gap-1">${tool.buttonText || '启动服务'} →</a>` 
+              : `<span class="tool-primary-action text-sm font-medium text-slate-600">暂无实例</span>`}
+            ${isPin ? `<span class="text-amber-500/50">${SVGS.pin}</span>` : ''}
+          </div>
+        </div>`;
+    };
 
-      state.history.unshift({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        time: 现在时间(),
-        type,
-        typeLabel,
-        score
+    const render = () => {
+      CONFIG.pages.forEach(p => {
+        document.querySelector(`#page-${p.id} .list-container`).innerHTML = tools.filter(t => t.category === p.id).sort((a,b) => (pinned.includes(b.id)?1:0) - (pinned.includes(a.id)?1:0)).map(t => renderCard(t)).join('');
+        const preEl = document.getElementById(`home${p.id.charAt(0).toUpperCase() + p.id.slice(1)}Preview`);
+        const top2 = tools.filter(t => t.category === p.id).slice(0, 2);
+        preEl.innerHTML = top2.length ? top2.map(t => `<div class="mt-2 truncate text-slate-300">${t.name}</div>`).join('') : '<div class="mt-2 text-slate-600 text-sm">空</div>';
       });
 
-      保存状态();
-      渲染();
-    }
+      document.getElementById('statTools').textContent = tools.length;
+      document.getElementById('statLinked').textContent = tools.filter(t => !!t.link).length;
+      document.getElementById('statRecent').textContent = recent.length;
 
-    function 删除记录(id) {
-      state.history = state.history.filter(item => item.id !== id);
-      保存状态();
-      渲染();
-    }
+      document.getElementById('pinnedList').innerHTML = pinned.map(id => tools.find(t => t.id === id)).filter(Boolean).map(t => renderCard(t, true)).join('');
+      document.getElementById('recentList').innerHTML = recent.map(id => tools.find(t => t.id === id)).filter(Boolean).map(t => renderCard(t, true)).join('');
+    };
 
-    function 重置全部() {
-      if (!confirm('确定要重置全部资料吗？')) return;
-      state = 默认状态();
-      保存状态();
-      填入设置值();
-      渲染设置();
-      渲染();
-    }
-
-    function 填入设置值() {
-      el.target.value = state.target;
-      el.initialCurrent.value = state.initialCurrent;
-    }
-
-    function 渲染记录() {
-      el.historyCount.textContent = `共 ${state.history.length} 笔`;
-
-      if (!state.history.length) {
-        el.historyWrap.innerHTML = `<div class="空状态">目前还没有记录</div>`;
-        return;
-      }
-
-      el.historyWrap.innerHTML = state.history.map((item, index) => `
-        <div class="记录卡">
-          <div class="记录主体">
-            <div class="记录时间">#${state.history.length - index} ・ ${item.time}</div>
-            <div class="记录分数">+${item.score} 分 ・ ${item.typeLabel}</div>
-          </div>
-          <button class="按钮 红按钮" onclick="删除记录('${item.id}')">删除</button>
-        </div>
-      `).join('');
-    }
-
-    function 渲染() {
-      const current = 目前总分();
-      const target = Math.max(0, Number(state.target) || 0);
-      const remaining = Math.max(0, target - current);
-      const progress = target === 0 ? 100 : Math.min(100, (current / target) * 100);
-      const needNormalRuns = remaining === 0 ? 0 : Math.ceil(remaining / 普通分);
-      const stamina = needNormalRuns * 每场体力;
-      const normalCount = 普通次数();
-      const specialCount = 特别次数();
-
-      el.currentDisplay.textContent = current.toLocaleString();
-      el.remainingDisplay.textContent = remaining.toLocaleString();
-      el.staminaDisplay.textContent = stamina.toLocaleString();
-      el.normalCountDisplay.textContent = normalCount.toLocaleString();
-      el.specialCountDisplay.textContent = specialCount.toLocaleString();
-      el.progressBar.style.width = `${progress}%`;
-
-      if (!state.started) {
-        el.statusText.textContent = '请先到设置里输入目前已有分数，然后按开始';
-      } else if (current >= target) {
-        el.statusText.textContent = `已达标，目前 ${current.toLocaleString()} 分`;
+    // 表单处理
+    const mask = document.getElementById('toolModalMask');
+    window.openModal = (idOrCat = 'games') => {
+      if (typeof idOrCat === 'string' && tools.find(t => t.id === idOrCat)) {
+        const t = tools.find(t => t.id === idOrCat);
+        editingId = t.id;
+        document.getElementById('toolCategory').value = t.category;
+        document.getElementById('toolName').value = t.name;
+        document.getElementById('toolDesc').value = t.desc;
+        document.getElementById('toolLink').value = t.link || '';
+        document.getElementById('toolButtonText').value = t.buttonText || '';
       } else {
-        el.statusText.textContent = `还差 ${remaining.toLocaleString()} 分，还要 ${needNormalRuns.toLocaleString()} 次普通奖励，约 ${stamina.toLocaleString()} 体力`;
+        editingId = null;
+        document.getElementById('toolName').value = document.getElementById('toolDesc').value = document.getElementById('toolLink').value = '';
       }
+      mask.classList.add('show');
+    };
 
-      渲染记录();
-    }
+    document.getElementById('closeModal').addEventListener('click', () => mask.classList.remove('show'));
+    document.getElementById('openAddTool').addEventListener('click', () => openModal());
+    
+    document.getElementById('saveTool').addEventListener('click', () => {
+      const name = document.getElementById('toolName').value.trim();
+      const desc = document.getElementById('toolDesc').value.trim();
+      if (!name || !desc) return;
 
-    function 处理回顶按钮() {
-      if (window.scrollY > 220) el.backToTopBtn.classList.add('show');
-      else el.backToTopBtn.classList.remove('show');
-    }
+      const data = { category: document.getElementById('toolCategory').value, status: document.getElementById('toolStatus').value, name, desc, link: document.getElementById('toolLink').value.trim(), buttonText: document.getElementById('toolButtonText').value.trim() };
 
-    function 回到最上方() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    window.删除记录 = 删除记录;
-
-    el.startBtn.addEventListener('click', 开始记录);
-    el.addNormalBtn.addEventListener('click', () => 加分('normal'));
-    el.addSpecialBtn.addEventListener('click', () => 加分('special'));
-    el.resetAllBtn.addEventListener('click', 重置全部);
-    el.openSettingsBtn.addEventListener('click', 打开设置);
-    el.closeSettingsBtn.addEventListener('click', 关闭设置);
-    el.backToTopBtn.addEventListener('click', 回到最上方);
-    window.addEventListener('scroll', 处理回顶按钮);
-
-    el.target.addEventListener('input', () => {
-      state.target = Math.max(0, Number(el.target.value) || 0);
-      保存状态();
-      渲染();
+      if (editingId) tools = tools.map(t => t.id === editingId ? { ...t, ...data } : t);
+      else tools.unshift({ id: `t-${Date.now()}`, ...data });
+      
+      save(); render(); mask.classList.remove('show'); showPage(data.category);
+      showToast(editingId ? "节点配置已更新" : "新节点已接入");
     });
 
-    el.initialCurrent.addEventListener('input', () => {
-      state.initialCurrent = Math.max(0, Number(el.initialCurrent.value) || 0);
-      保存状态();
-      渲染();
-    });
-
-    填入设置值();
-    渲染设置();
-    渲染();
-    处理回顶按钮();
+    render();
   </script>
 </body>
 </html>
